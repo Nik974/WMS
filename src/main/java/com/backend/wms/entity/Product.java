@@ -23,5 +23,8 @@ public class Product {
     @Column(name = "unit", length = Integer.MAX_VALUE)
     private String unit;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
 }
