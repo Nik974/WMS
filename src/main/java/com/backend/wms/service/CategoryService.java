@@ -27,6 +27,12 @@ public class CategoryService {
         return categoryMapper.toDtoList(categoryRepository.findAll());
     }
 
+    public CategoryDto getCategoryById(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        return categoryMapper.toDto(category);
+    }
+
     @Transactional
     public CategoryDto addCategory(CategoryRequest categoryDto) {
         if (existsByCategoryNameIgnoreCase(categoryDto.categoryName())) {
