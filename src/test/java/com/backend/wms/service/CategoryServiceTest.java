@@ -3,6 +3,8 @@ package com.backend.wms.service;
 import com.backend.wms.dto.CategoryDto;
 import com.backend.wms.dto.CategoryRequest;
 import com.backend.wms.entity.Category;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
+import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.CategoryMapper;
 import com.backend.wms.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,8 +63,8 @@ class CategoryServiceTest {
         CategoryRequest request = new CategoryRequest("Electronics");
         when(categoryRepository.existsByCategoryNameIgnoreCase("Electronics")).thenReturn(true);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> categoryService.addCategory(request));
+        ResourceAlreadyExistsException exception = assertThrows(
+                ResourceAlreadyExistsException.class, () -> categoryService.addCategory(request));
 
         assertEquals("Category already exists", exception.getMessage());
         verify(categoryRepository, never()).save(any());
@@ -96,8 +98,8 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class, () -> categoryService.editCategory(categoryId, request));
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class, () -> categoryService.editCategory(categoryId, request));
 
         assertEquals("Category not found", exception.getMessage());
         verifyNoInteractions(categoryMapper);
@@ -125,7 +127,8 @@ class CategoryServiceTest {
         Long categoryId = 1L;
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> categoryService.getCategoryById(categoryId));
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class, () -> categoryService.getCategoryById(categoryId));
         verifyNoInteractions(categoryMapper);
     }
 }

@@ -3,6 +3,8 @@ package com.backend.wms.service;
 import com.backend.wms.dto.CategoryDto;
 import com.backend.wms.dto.CategoryRequest;
 import com.backend.wms.entity.Category;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
+import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.CategoryMapper;
 import com.backend.wms.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +31,14 @@ public class CategoryService {
 
     public CategoryDto getCategoryById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         return categoryMapper.toDto(category);
     }
 
     @Transactional
     public CategoryDto addCategory(CategoryRequest categoryDto) {
         if (existsByCategoryNameIgnoreCase(categoryDto.categoryName())) {
-            throw new IllegalArgumentException("Category already exists");}
+            throw new ResourceAlreadyExistsException("Category already exists");}
 
         Category entity = categoryMapper.toEntity(categoryDto);
         Category savedCategory = categoryRepository.save(entity);
@@ -46,18 +48,14 @@ public class CategoryService {
     @Transactional
     public CategoryDto editCategory(Long categoryId, CategoryRequest categoryDto) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         boolean isCategoryNameChanged = !category.getCategoryName().equalsIgnoreCase(categoryDto.categoryName());
         if (isCategoryNameChanged && existsByCategoryNameIgnoreCase(categoryDto.categoryName())) {
-            throw new IllegalArgumentException("Category already exists" + categoryDto.categoryName());
+            throw new ResourceAlreadyExistsException("Category already exists" + categoryDto.categoryName());
         }
 
         categoryMapper.updateCategoryFromDto(categoryDto, category);
         return categoryMapper.toDto(category);
     }
-
-
-
-
 }
