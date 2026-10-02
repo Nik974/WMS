@@ -2,8 +2,7 @@ package com.backend.wms.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record SupplierDto(
-        Long supplierId,
+public record UpdateSupplierDto(
 
         @NotBlank(message = "Supplier name cannot be blank")
         String supplierName,
@@ -12,4 +11,3 @@ public record SupplierDto(
         String taxId
 ) {
 }
-
