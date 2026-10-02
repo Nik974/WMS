@@ -17,5 +17,6 @@ public class Supplier {
     @Column(name = "supplier_name", nullable = false, length = Integer.MAX_VALUE)
     private String supplierName;
 
-
+    @Column(name = "tax_id", nullable = false)
+    private String taxId;
 }
