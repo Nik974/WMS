@@ -3,6 +3,7 @@ package com.backend.wms.service;
 import com.backend.wms.dto.SupplierDto;
 import com.backend.wms.dto.UpdateSupplierDto;
 import com.backend.wms.entity.Supplier;
+import com.backend.wms.exception.ResourceAlreadyInUse;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.SupplierMapper;
 import com.backend.wms.repository.SupplierRepository;
@@ -41,7 +42,7 @@ public class SupplierService {
             String trimmedTaxId = supplierDto.taxId().trim();
 
             if (supplierRepository.existsByTaxIdAndIdNot(trimmedTaxId, supplierId)) {
-                throw new ResourceNotFoundException ("Tax ID '" + trimmedTaxId + "' is already in use by another supplier");
+                throw new ResourceAlreadyInUse("Tax ID '" + trimmedTaxId + "' is already in use by another supplier");
             }
             supplier.setTaxId(trimmedTaxId);
         } else {
