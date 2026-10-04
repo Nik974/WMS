@@ -1,7 +1,9 @@
 package com.backend.wms.dto;
 
+import lombok.Builder;
 import java.time.LocalDate;
 
+@Builder
 public record StockDto(
 
         Long stockId,
