@@ -1,9 +1,13 @@
 package com.backend.wms.mapper;
 
 import com.backend.wms.dto.StockDto;
+import com.backend.wms.entity.Batch;
+import com.backend.wms.entity.Location;
+import com.backend.wms.entity.Product;
 import com.backend.wms.entity.Stock;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -30,5 +34,21 @@ public interface StockMapper {
         int reserved = entity.getReservedQuantity() != null ? entity.getReservedQuantity() : 0;
         return quantity - reserved;
     }
+
+    @Mapping(target = "id", source = "dto.stockId")
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "product", source = "product")
+    @Mapping(target = "batch", source = "batch")
+    @Mapping(target = "quantity", source = "dto.quantity")
+    @Mapping(target = "reservedQuantity", source = "dto.reservedQuantity")
+    Stock toEntityWithDependencies(StockDto dto, Location location, Product product, Batch batch);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "product", source = "product")
+    @Mapping(target = "batch", source = "batch")
+    @Mapping(target = "quantity", source = "dto.quantity")
+    @Mapping(target = "reservedQuantity", source = "dto.reservedQuantity")
+    void updateEntity(StockDto dto, Location location, Product product, Batch batch, @MappingTarget Stock entity);
 
 }
