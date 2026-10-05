@@ -25,7 +25,7 @@ public class SupplierService {
     @Transactional
     public SupplierDto addSupplier(@Valid SupplierDto supplierDto) {
         if(supplierRepository.existsByTaxId(supplierDto.taxId())) {
-            throw new ResourceNotFoundException("Supplier with tax ID " + supplierDto.taxId() + " already exists.");
+            throw new ResourceAlreadyExistsException("Supplier with tax ID " + supplierDto.taxId() + " already exists.");
         }
         Supplier supplier = supplierMapper.toEntity(supplierDto);
         supplier.setSupplierName(supplier.getSupplierName().trim());
