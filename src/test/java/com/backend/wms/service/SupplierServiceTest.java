@@ -3,6 +3,7 @@ package com.backend.wms.service;
 import com.backend.wms.dto.SupplierDto;
 import com.backend.wms.dto.UpdateSupplierDto;
 import com.backend.wms.entity.Supplier;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
 import com.backend.wms.exception.ResourceAlreadyInUse;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.SupplierMapper;
@@ -59,7 +60,7 @@ class SupplierServiceTest {
 
         when(supplierRepository.existsByTaxId("123456789")).thenReturn(true);
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
+        Exception exception = assertThrows(ResourceAlreadyExistsException.class, () -> {
             supplierService.addSupplier(supplierDto);
         });
 

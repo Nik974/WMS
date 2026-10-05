@@ -3,6 +3,7 @@ package com.backend.wms.service;
 import com.backend.wms.dto.SupplierDto;
 import com.backend.wms.dto.UpdateSupplierDto;
 import com.backend.wms.entity.Supplier;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
 import com.backend.wms.exception.ResourceAlreadyInUse;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.SupplierMapper;
@@ -25,7 +26,7 @@ public class SupplierService {
     @Transactional
     public SupplierDto addSupplier(@Valid SupplierDto supplierDto) {
         if(supplierRepository.existsByTaxId(supplierDto.taxId())) {
-            throw new ResourceNotFoundException("Supplier with tax ID " + supplierDto.taxId() + " already exists.");
+            throw new ResourceAlreadyExistsException("Supplier with tax ID " + supplierDto.taxId() + " already exists.");
         }
         Supplier supplier = supplierMapper.toEntity(supplierDto);
         supplier.setSupplierName(supplier.getSupplierName().trim());
