@@ -16,4 +16,7 @@ public interface LocationMapper {
 
     List<LocationDto> toDtoList(List<Location> entities);
 
+    @Mapping(source = "locationId", target = "id")
+    @Mapping(source = "warehouseId", target = "warehouse.id")
+    Location toEntity(LocationDto dto);
 }
