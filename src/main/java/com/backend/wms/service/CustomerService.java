@@ -37,7 +37,7 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer does not exist"));
 
-        boolean isCustomerNameChanged = customer.getCustomerName().equalsIgnoreCase(dto.customerName());
+        boolean isCustomerNameChanged = !customer.getCustomerName().equalsIgnoreCase(dto.customerName());
 
         if (isCustomerNameChanged && customerRepository.existsByCustomerNameIgnoreCase(dto.customerName())){
             throw new ResourceAlreadyExistsException("Customer already exists");
