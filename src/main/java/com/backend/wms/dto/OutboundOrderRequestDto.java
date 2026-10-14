@@ -3,7 +3,8 @@ package com.backend.wms.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record OutboundOrderDto(
+public record OutboundOrderRequestDto(
+        Long id,
         Long orderId,
         Long warehouseId,
         Long customerId,
