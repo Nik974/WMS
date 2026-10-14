@@ -1,4 +1,5 @@
 package com.backend.wms.mapper;
+import com.backend.wms.dto.CreateOutboundOrderDto;
 import com.backend.wms.dto.OutboundOrderDto;
 import com.backend.wms.entity.OutboundOrder;
 import org.mapstruct.Mapper;
@@ -15,6 +16,11 @@ public interface OutboundOrderMapper {
     @Mapping(source = "id", target = "orderId")
     OutboundOrderDto toDto(OutboundOrder entity);
 
-    List<OutboundOrderDto> toDtoList(List<OutboundOrder> entities);
+    @Mapping(source = "warehouseId", target = "warehouse.id")
+    @Mapping(source = "customerId", target = "customer.id")
+    @Mapping(source = "orderId", target = "id")
+    @Mapping(source = "customerName", target = "customer.customerName")
+    OutboundOrder toEntity(CreateOutboundOrderDto dto);
 
+    List<OutboundOrderDto> toDtoList(List<OutboundOrder> all);
 }
