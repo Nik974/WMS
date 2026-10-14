@@ -1,4 +1,5 @@
 package com.backend.wms.mapper;
+import com.backend.wms.dto.CreateInboundOrderDto;
 import com.backend.wms.dto.InboundOrderDto;
 import com.backend.wms.entity.InboundOrder;
 import org.mapstruct.Mapper;
@@ -17,4 +18,9 @@ public interface InboundOrderMapper {
 
     List<InboundOrderDto> toDtoList(List<InboundOrder> entities);
 
+    @Mapping(source = "warehouseId", target = "warehouse.id")
+    @Mapping(source = "supplierId", target = "supplier.id")
+    @Mapping(source = "supplierName", target = "supplier.supplierName")
+    @Mapping(target = "id", ignore = true)
+    InboundOrder toEntity(CreateInboundOrderDto dto);
 }
