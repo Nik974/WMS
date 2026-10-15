@@ -5,9 +5,7 @@ import java.time.LocalDateTime;
 public record StockMovementDto(
         Long id,
         Long productId,
-        String productName,
         Long fromLocationId,
-        String fromLocationCode,
         Long toLocationId,
         String toLocationCode,
         Long userId,
