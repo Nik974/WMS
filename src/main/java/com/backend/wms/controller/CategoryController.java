@@ -34,9 +34,9 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(categoryService.addCategory(dto));
     }
 
-    @PutMapping("/edit")
+    @PutMapping("/edit/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<CategoryDto> editCategory(@Valid @RequestBody Long id,CategoryRequest dto){
+    public ResponseEntity<CategoryDto> editCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest dto){
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(categoryService.editCategory(id, dto));
     }
 }
