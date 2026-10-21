@@ -1,6 +1,5 @@
 package com.backend.wms.controller;
 
-
 import com.backend.wms.dto.CategoryDto;
 import com.backend.wms.dto.CategoryRequest;
 import com.backend.wms.service.CategoryService;
@@ -35,11 +34,9 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(categoryService.addCategory(dto));
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryDto> editCategory(@Valid @RequestBody Long id,CategoryRequest dto){
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(categoryService.editCategory(id, dto));
     }
-
-
 }
