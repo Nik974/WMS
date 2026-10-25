@@ -45,14 +45,14 @@ public class AuthService {
             throw new ResourceAlreadyExistsException("This username is unavailable ");
         }
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("This username is unavailable ");
+            throw new ResourceAlreadyExistsException("This email is unavailable ");
         }
 
         User user = User.builder()
                 .username(request.username())
                 .email(request.email())
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .role(request.role())
+                .role("WORKER")
                 .build();
 
         userRepository.save(user);
