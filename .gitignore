@@ -4,7 +4,10 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+.env
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
 ### STS ###
 .apt_generated
 .classpath

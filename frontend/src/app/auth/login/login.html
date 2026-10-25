@@ -1,0 +1,52 @@
+<nav>
+  <mat-toolbar>
+    <span>WMS</span>
+
+    <span class="example-spacer"></span>
+
+    <a mat-button>Home</a>
+    <a mat-button routerLink="/register">Register</a>
+    <a mat-button>About</a>
+  </mat-toolbar>
+</nav>
+<div class="login-container">
+
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>LogIn</mat-card-title>
+      <mat-card-subtitle>Warehouse Management System</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Login</mat-label>
+          <input matInput formControlName="username" placeholder="Login">
+          @if (loginForm.get('username')?.hasError('required')) {
+            <mat-error>Login is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix type="button"
+                  (click)="hidePassword = !hidePassword"
+                  [attr.aria-label]="'Toggle password visibility'">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          @if (loginForm.get('password')?.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+        <button mat-flat-button color="primary" type="submit" class="submit-btn" [disabled]="loginForm.invalid || loading()">
+          Log In
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
