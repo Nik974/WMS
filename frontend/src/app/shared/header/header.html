@@ -1,0 +1,9 @@
+<mat-toolbar>
+  <span class="logo">WMS</span>
+  <a mat-button routerLink="/products" class="ml-2">Products</a>
+  <a mat-button routerLink="/dashboard">Dashboard</a>
+  <span class="spacer"></span>
+  <span class="spacer"></span>
+  <span class="user">{{ auth.session()?.username }} ({{ auth.session()?.role }})</span>
+  <button mat-button (click)="logout()">Log out</button>
+</mat-toolbar>
