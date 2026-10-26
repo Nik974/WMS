@@ -1,0 +1,81 @@
+<app-header />
+
+<main class="page">
+  <div class="page-header">
+    <h1>Products</h1>
+    @if (canEdit()) {
+      <button mat-flat-button (click)="openDialog()">
+        <mat-icon>add</mat-icon> Add product
+      </button>
+    }
+  </div>
+
+  <mat-expansion-panel class="filters">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Search</mat-panel-title>
+      <mat-panel-description>Filter by SKU, name or category</mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="filterForm" class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>SKU</mat-label>
+        <input matInput formControlName="sku" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <input matInput formControlName="category" />
+      </mat-form-field>
+      <button mat-button type="button" (click)="clearFilters()">Clear</button>
+    </form>
+  </mat-expansion-panel>
+
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource">
+      <ng-container matColumnDef="productSku">
+        <th mat-header-cell *matHeaderCellDef>SKU</th>
+        <td mat-cell *matCellDef="let p">{{ p.productSku }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="productName">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let p">{{ p.productName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="unit">
+        <th mat-header-cell *matHeaderCellDef>Unit</th>
+        <td mat-cell *matCellDef="let p">{{ p.unit }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="categoryName">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let p">{{ p.categoryName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let p">
+          @if (canEdit()) {
+            <button mat-icon-button (click)="openDialog(p)" aria-label="Edit product">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="empty" [attr.colspan]="columns.length">
+          {{ loading() ? 'Loading...' : 'No products found' }}
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page" />
+  </div>
+</main>
