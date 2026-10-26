@@ -4,6 +4,7 @@ import { RegisterComponent } from './auth/register/register';
 import {roleGuard} from './auth/auth.guard';
 import {Dashboard} from './dashboard/dashboard';
 import {Products} from './products/products';
+import {Categories} from './categories/categories';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'products', component: Products, canActivate: [roleGuard] },
   { path: '', redirectTo: 'products', pathMatch: 'full' },
+  { path: 'categories', component: Categories, canActivate: [roleGuard] },
 ];
