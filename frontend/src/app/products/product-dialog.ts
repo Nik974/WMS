@@ -6,11 +6,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 import {Product, ProductRequest, ProductService} from './product.service';
+import {Category, CategoryService} from '../categories/category.service';
+import {MatOption} from '@angular/material/core';
+import {MatSelect} from '@angular/material/select';
 
 @Component({
   selector: 'app-product-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatOption, MatSelect],
   template: `
     <h2 mat-dialog-title>{{ product ? 'Edit product' : 'New product' }}</h2>
 
@@ -32,8 +35,12 @@ import {Product, ProductRequest, ProductService} from './product.service';
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Category ID</mat-label>
-          <input matInput type="number" formControlName="categoryId" />
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="categoryId">
+            @for (c of categories(); track c.categoryId) {
+              <mat-option [value]="c.categoryId">{{ c.categoryName }}</mat-option>
+            }
+          </mat-select>
         </mat-form-field>
 
         @if (error()) { <p class="error">{{ error() }}</p> }
@@ -55,6 +62,12 @@ export class ProductDialog {
   private fb = inject(FormBuilder);
   private service = inject(ProductService);
   private ref = inject(MatDialogRef<ProductDialog>);
+  private categoryService = inject(CategoryService);
+  categories = signal<Category[]>([]);
+
+  constructor() {
+    this.categoryService.getAll().subscribe((list) => this.categories.set(list));
+  }
   product: Product | null = inject(MAT_DIALOG_DATA, { optional: true }) ?? null;
 
   saving = signal(false);
