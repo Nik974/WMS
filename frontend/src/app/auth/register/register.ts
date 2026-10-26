@@ -61,11 +61,11 @@ export class RegisterComponent {
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
         if (err.status === 409) {
-          this.errorMessage.set('Это имя пользователя уже занято');
+          this.errorMessage.set('Username is already taken');
         } else if (err.status === 400) {
-          this.errorMessage.set('Проверьте правильность введённых данных');
+          this.errorMessage.set('Please verify the entered data');
         } else {
-          this.errorMessage.set('Не удалось зарегистрироваться. Попробуйте позже');
+          this.errorMessage.set('Something went wrong, please try again later');
         }
       },
     });
