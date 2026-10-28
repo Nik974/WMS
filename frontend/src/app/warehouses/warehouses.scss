@@ -1,0 +1,14 @@
+.page { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+h1 { margin: 0; font: var(--mat-sys-headline-medium); }
+
+.filters { margin-bottom: 16px; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-top: 8px; }
+
+.table-card {
+  background: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-large);
+  overflow: hidden;
+  table { width: 100%; background: transparent; }
+}
+.empty { text-align: center; padding: 32px; color: var(--mat-sys-on-surface-variant); }
