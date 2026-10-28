@@ -25,14 +25,14 @@ public class WarehouseController {
     }
 
     @GetMapping("/name")
-    public ResponseEntity<List<WarehouseDto>> findAllWarehousesByName(@RequestBody String name){
+    public ResponseEntity<List<WarehouseDto>> findAllWarehousesByName(@RequestParam String name){
         List<WarehouseDto> list = warehouseService.searchWarehousesByName(name);
         if (list.isEmpty()) return ResponseEntity.status(404).body(list);
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/address")
-    public ResponseEntity<List<WarehouseDto>> findAllWarehousesByAddress(@RequestBody String address){
+    public ResponseEntity<List<WarehouseDto>> findAllWarehousesByAddress(@RequestParam String address){
         List<WarehouseDto> list = warehouseService.searchWarehousesByAddress(address);
         if (list.isEmpty()) return ResponseEntity.status(404).body(list);
         return ResponseEntity.ok(list);
@@ -48,6 +48,11 @@ public class WarehouseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<WarehouseDto> editWarehouse(@PathVariable Long id, @Valid @RequestBody WarehouseDto dto){
         return ResponseEntity.ok(warehouseService.updateWarehouse(id, dto));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WarehouseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(warehouseService.getWarehouseById(id));
     }
 
 }
