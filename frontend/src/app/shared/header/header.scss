@@ -2,3 +2,8 @@ mat-toolbar {
   .logo {
     margin-right: 16px;
   }}
+.mobile-only { display: none; }
+@media (max-width: 720px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: inline-flex; }
+}

@@ -1,9 +1,28 @@
 <mat-toolbar>
-  <span class="logo">WMS</span>
-  <a mat-button routerLink="/products" class="ml-2">Products</a>
-  <a mat-button routerLink="/dashboard">Dashboard</a>
+  <a mat-button class="brand" routerLink="/dashboard">WMS</a>
+
+  <span class="desktop-only">
+    <a mat-button routerLink="/products">Products</a>
+    <a mat-button routerLink="/categories">Categories</a>
+    <a mat-button routerLink="/warehouses">Warehouses</a>
+  </span>
+
   <span class="spacer"></span>
-  <span class="spacer"></span>
-  <span class="user">{{ auth.session()?.username }} ({{ auth.session()?.role }})</span>
-  <button mat-button (click)="logout()">Log out</button>
+
+  <span class="user desktop-only">{{ auth.session()?.username }} ({{ auth.session()?.role }})</span>
+  <button mat-button class="desktop-only" (click)="logout()">Log out</button>
+
+  <button mat-icon-button class="mobile-only" [matMenuTriggerFor]="menu" aria-label="Menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <mat-menu #menu="matMenu">
+    <div class="menu-user" mat-menu-item disabled>
+      {{ auth.session()?.username }} ({{ auth.session()?.role }})
+    </div>
+    <a mat-menu-item routerLink="/products">Products</a>
+    <a mat-menu-item routerLink="/categories">Categories</a>
+    <a mat-menu-item routerLink="/warehouses">Warehouses</a>
+    <button mat-menu-item (click)="logout()">Log out</button>
+  </mat-menu>
 </mat-toolbar>
