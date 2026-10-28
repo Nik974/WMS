@@ -5,6 +5,7 @@ import {roleGuard} from './auth/auth.guard';
 import {Dashboard} from './dashboard/dashboard';
 import {Products} from './products/products';
 import {Categories} from './categories/categories';
+import {Warehouses} from './warehouses/warehouses';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -14,4 +15,5 @@ export const routes: Routes = [
   { path: 'products', component: Products, canActivate: [roleGuard] },
   { path: '', redirectTo: 'products', pathMatch: 'full' },
   { path: 'categories', component: Categories, canActivate: [roleGuard] },
+  { path: 'warehouses', component: Warehouses, canActivate: [roleGuard] },
 ];

@@ -8,7 +8,12 @@ h1 { margin: 0; font: var(--mat-sys-headline-medium); }
 .table-card {
   background: var(--mat-sys-surface-container);
   border-radius: var(--mat-sys-corner-large);
-  overflow: hidden;
-  table { width: 100%; background: transparent; }
+  overflow-x: auto;
+  table { width: 100%; background: transparent; min-width: 480px; }
 }
 .empty { text-align: center; padding: 32px; color: var(--mat-sys-on-surface-variant); }
+@media (max-width: 600px) {
+  .page { padding: 16px 12px; }
+  .page-header { flex-wrap: wrap; gap: 12px; }
+  .filter-row mat-form-field { width: 100%; }
+}
