@@ -25,5 +25,6 @@ export class Dashboard {
   tiles: Tile[] = [
     { label: 'Products', icon: 'inventory_2', link: '/products', enabled: true },
     { label: 'Categories', icon: 'category', link: '/categories', enabled: true },
+    { label: 'Warehouses', icon: 'warehouse', link: '/warehouses', enabled: true },
   ];
 }
