@@ -26,5 +26,6 @@ export class Dashboard {
     { label: 'Products', icon: 'inventory_2', link: '/products', enabled: true },
     { label: 'Categories', icon: 'category', link: '/categories', enabled: true },
     { label: 'Warehouses', icon: 'warehouse', link: '/warehouses', enabled: true },
+    { label: 'Customers', icon: 'groups', link: '/customers', enabled: true },
   ];
 }
