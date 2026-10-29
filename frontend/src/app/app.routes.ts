@@ -6,6 +6,7 @@ import {Dashboard} from './dashboard/dashboard';
 import {Products} from './products/products';
 import {Categories} from './categories/categories';
 import {Warehouses} from './warehouses/warehouses';
+import { Customers } from './customers/customers';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -16,4 +17,5 @@ export const routes: Routes = [
   { path: '', redirectTo: 'products', pathMatch: 'full' },
   { path: 'categories', component: Categories, canActivate: [roleGuard] },
   { path: 'warehouses', component: Warehouses, canActivate: [roleGuard] },
+  { path: 'customers', component: Customers, canActivate: [roleGuard] },
 ];
