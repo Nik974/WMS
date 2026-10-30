@@ -21,6 +21,9 @@ public interface WarehouseMapper {
     @Mapping(source = "warehouseAddress", target = "address")
     Warehouse toEntity(WarehouseDto dto);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "warehouseName", target = "name")
+    @Mapping(source = "warehouseAddress", target = "address")
     void updateEntityFromDto(WarehouseDto dto, @MappingTarget Warehouse entity);
 
 }

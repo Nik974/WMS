@@ -3,17 +3,18 @@ package com.backend.wms.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.backend.wms.dto.CreateOutboundOrderDto;
-import com.backend.wms.dto.OutboundOrderRequestDto;
-import com.backend.wms.entity.Customer;
-import com.backend.wms.entity.OutboundOrder;
-import com.backend.wms.entity.Warehouse;
+import com.backend.wms.dto.OutboundItemDto;
+import com.backend.wms.dto.OutboundOrderDto;
+import com.backend.wms.entity.*;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.OutboundOrderMapper;
 import com.backend.wms.repository.CustomerRepository;
 import com.backend.wms.repository.OutboundOrderRepository;
+import com.backend.wms.repository.ProductRepository;
 import com.backend.wms.repository.WarehouseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -42,16 +44,19 @@ class OutboundOrderServiceTest {
     @Mock
     private WarehouseRepository warehouseRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     @Test
     void getOutboundOrderById_ShouldReturnDto_WhenOrderExists() {
         Long orderId = 1L;
         OutboundOrder order = new OutboundOrder();
-        OutboundOrderRequestDto expectedDto = new OutboundOrderRequestDto(orderId, 1L, 1L, 1L, "NEW", "Ready", LocalDateTime.now(), List.of());
+        OutboundOrderDto expectedDto = new OutboundOrderDto(orderId, 1L, 1L, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of());
 
         when(outboundOrderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(outboundOrderMapper.toDto(order)).thenReturn(expectedDto);
 
-        OutboundOrderRequestDto result = outboundOrderService.getOutboundOrderById(orderId);
+        OutboundOrderDto result = outboundOrderService.getOutboundOrderById(orderId);
 
         assertNotNull(result);
         assertEquals(expectedDto, result);
@@ -73,12 +78,12 @@ class OutboundOrderServiceTest {
     void getAllOutboundOrders_ShouldReturnListOfDtos() {
         OutboundOrder order = new OutboundOrder();
         List<OutboundOrder> orders = List.of(order);
-        List<OutboundOrderRequestDto> expectedDtos = List.of(new OutboundOrderRequestDto(1L, 1L, 1L, 1L, "NEW", "Ready", LocalDateTime.now(), List.of()));
+        List<OutboundOrderDto> expectedDtos = List.of(new OutboundOrderDto(1L, 1L, 1L, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of()));
 
         when(outboundOrderRepository.findAll()).thenReturn(orders);
         when(outboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
-        List<OutboundOrderRequestDto> result = outboundOrderService.getAllOutboundOrders();
+        List<OutboundOrderDto> result = outboundOrderService.getAllOutboundOrders();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -92,13 +97,13 @@ class OutboundOrderServiceTest {
         Long customerId = 1L;
         OutboundOrder order = new OutboundOrder();
         List<OutboundOrder> orders = List.of(order);
-        List<OutboundOrderRequestDto> expectedDtos = List.of(new OutboundOrderRequestDto(1L, customerId, 1L, 1L, "NEW", "Ready", LocalDateTime.now(), List.of()));
+        List<OutboundOrderDto> expectedDtos = List.of(new OutboundOrderDto(1L, customerId, 1L, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of()));
 
         when(customerRepository.existsById(customerId)).thenReturn(true);
         when(outboundOrderRepository.findAllByCustomerId(customerId)).thenReturn(orders);
         when(outboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
-        List<OutboundOrderRequestDto> result = outboundOrderService.getOutboundOrdersByCustomerId(customerId);
+        List<OutboundOrderDto> result = outboundOrderService.getOutboundOrdersByCustomerId(customerId);
 
         assertNotNull(result);
         assertEquals(expectedDtos, result);
@@ -121,13 +126,13 @@ class OutboundOrderServiceTest {
         Long warehouseId = 1L;
         OutboundOrder order = new OutboundOrder();
         List<OutboundOrder> orders = List.of(order);
-        List<OutboundOrderRequestDto> expectedDtos = List.of(new OutboundOrderRequestDto(1L, 1L, warehouseId, 1L, "NEW", "Ready", LocalDateTime.now(), List.of()));
+        List<OutboundOrderDto> expectedDtos = List.of(new OutboundOrderDto(1L, 1L, warehouseId, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of()));
 
         when(warehouseRepository.existsById(warehouseId)).thenReturn(true);
         when(outboundOrderRepository.findAllByWarehouseId(warehouseId)).thenReturn(orders);
         when(outboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
-        List<OutboundOrderRequestDto> result = outboundOrderService.getOutboundOrdersByWarehouseId(warehouseId);
+        List<OutboundOrderDto> result = outboundOrderService.getOutboundOrdersByWarehouseId(warehouseId);
 
         assertNotNull(result);
         assertEquals(expectedDtos, result);
@@ -147,15 +152,15 @@ class OutboundOrderServiceTest {
 
     @Test
     void getOutboundOrdersByStatus_ShouldReturnListOfDtos() {
-        String status = "NEW";
+        OutboundStatus status = OutboundStatus.NEW;
         OutboundOrder order = new OutboundOrder();
         List<OutboundOrder> orders = List.of(order);
-        List<OutboundOrderRequestDto> expectedDtos = List.of(new OutboundOrderRequestDto(1L, 1L, 1L, 1L, status, "Ready", LocalDateTime.now(), List.of()));
+        List<OutboundOrderDto> expectedDtos = List.of(new OutboundOrderDto(1L, 1L, 1L, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of()));
 
         when(outboundOrderRepository.findAllByStatus(status)).thenReturn(orders);
         when(outboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
-        List<OutboundOrderRequestDto> result = outboundOrderService.getOutboundOrdersByStatus(status);
+        List<OutboundOrderDto> result = outboundOrderService.getOutboundOrdersByStatus(status);
 
         assertNotNull(result);
         assertEquals(expectedDtos, result);
@@ -168,12 +173,12 @@ class OutboundOrderServiceTest {
         LocalDateTime end = LocalDateTime.now();
         OutboundOrder order = new OutboundOrder();
         List<OutboundOrder> orders = List.of(order);
-        List<OutboundOrderRequestDto> expectedDtos = List.of(new OutboundOrderRequestDto(1L, 1L, 1L, 1L, "NEW", "Ready", LocalDateTime.now(), List.of()));
+        List<OutboundOrderDto> expectedDtos = List.of(new OutboundOrderDto(1L, 1L, 1L, 1L, "NEW", OutboundStatus.NEW, LocalDateTime.now(), List.of()));
 
         when(outboundOrderRepository.findAllByCreatedAtBetween(start, end)).thenReturn(orders);
         when(outboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
-        List<OutboundOrderRequestDto> result = outboundOrderService.getOutboundOrdersByCreatedAtBetween(start, end);
+        List<OutboundOrderDto> result = outboundOrderService.getOutboundOrdersByCreatedAtBetween(start, end);
 
         assertNotNull(result);
         assertEquals(expectedDtos, result);
@@ -182,68 +187,74 @@ class OutboundOrderServiceTest {
 
     @Test
     void createOutboundOrder_ShouldSaveAndReturnDto_WhenValid() {
-        CreateOutboundOrderDto inputDto = new CreateOutboundOrderDto(1L, 1L, 1L, "New", "NEW", LocalDateTime.now(), List.of());
-        OutboundOrder entity = new OutboundOrder();
-        OutboundOrder savedEntity = new OutboundOrder();
-        savedEntity.setId(1L);
-        OutboundOrderRequestDto expectedDto = new OutboundOrderRequestDto(1L, 1L, 1L, 1L, "NEW", "Ready", LocalDateTime.now(), List.of());
+        CreateOutboundOrderDto dto = new CreateOutboundOrderDto(
+                null, 1L, 2L, null, null, null,
+                List.of(new OutboundItemDto(null, null, 10L, 3, null)));
+        OutboundOrderDto expectedDto = new OutboundOrderDto( 1L,null, 1L, 2L, null, null, null, List.of(new OutboundItemDto(null, null, 10L, 3, null)));
 
-        when(customerRepository.existsById(1L)).thenReturn(true);
-        when(outboundOrderMapper.toEntity(inputDto)).thenReturn(entity);
-        when(outboundOrderRepository.save(entity)).thenReturn(savedEntity);
-        when(outboundOrderMapper.toDto(savedEntity)).thenReturn(expectedDto);
-        when(warehouseRepository.existsById(1L)).thenReturn(true);
+        Customer customer = new Customer();
+        Warehouse warehouse = new Warehouse();
+        Product product = new Product();
+        product.setId(10L);
 
-        OutboundOrderRequestDto result = outboundOrderService.createOutboundOrder(inputDto);
+        when(customerRepository.findById(2L)).thenReturn(Optional.of(customer));
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.of(warehouse));
+        when(productRepository.findAllById(Set.of(10L))).thenReturn(List.of(product));
+        when(outboundOrderRepository.save(any(OutboundOrder.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+        when(outboundOrderMapper.toDto(any(OutboundOrder.class))).thenReturn(expectedDto);
 
-        assertNotNull(result);
+        OutboundOrderDto result = outboundOrderService.createOutboundOrder(dto);
+
         assertEquals(expectedDto, result);
-        verify(customerRepository).existsById(1L);
-        verify(warehouseRepository).existsById(1L);
-        verify(outboundOrderRepository).save(entity);
+
+        ArgumentCaptor<OutboundOrder> captor = ArgumentCaptor.forClass(OutboundOrder.class);
+        verify(outboundOrderRepository).save(captor.capture());
+        assertEquals(OutboundStatus.NEW, captor.getValue().getStatus());
+        assertEquals(1, captor.getValue().getItems().size());
     }
 
     @Test
     void createOutboundOrder_ShouldThrowException_WhenCustomerNotFound() {
-        CreateOutboundOrderDto inputDto = new CreateOutboundOrderDto(1L, 1L, 1L, "New", "NEW", LocalDateTime.now(), List.of());
+        CreateOutboundOrderDto inputDto = new CreateOutboundOrderDto(1L, 1L, 1L, "New", OutboundStatus.NEW, LocalDateTime.now(), List.of());
 
-        when(customerRepository.existsById(1L)).thenReturn(false);
-
+        when(customerRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> outboundOrderService.createOutboundOrder(inputDto));
-        verify(customerRepository).existsById(1L);
+        verify(customerRepository).findById(1L);
         verifyNoInteractions(outboundOrderMapper, outboundOrderRepository);
     }
 
     @Test
     void editOutboundOrder_ShouldUpdateAndReturnDto_WhenValid() {
         Long orderId = 1L;
-        OutboundOrderRequestDto updateDto = new OutboundOrderRequestDto(orderId, 2L, 2L, 2L, "Updated", "PROCESSING", LocalDateTime.now(), List.of());
+        OutboundOrderDto updateDto = new OutboundOrderDto(
+                orderId, orderId, 2L, 2L, "Updated", OutboundStatus.NEW, LocalDateTime.now(), List.of());
+        OutboundOrderDto expectedDto = new OutboundOrderDto(
+                orderId, orderId, 2L, 2L, "Updated", OutboundStatus.NEW, LocalDateTime.now(), List.of());
+
         OutboundOrder existingOrder = new OutboundOrder();
         existingOrder.setId(orderId);
-        OutboundOrderRequestDto expectedDto = new OutboundOrderRequestDto(orderId, 2L, 2L, 2L, "PROCESSING", "Updated", LocalDateTime.now(), List.of());
+        existingOrder.setStatus(OutboundStatus.NEW);
+        Customer customer = new Customer();
+        Warehouse warehouse = new Warehouse();
 
         when(outboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(customerRepository.existsById(2L)).thenReturn(true);
-        when(warehouseRepository.existsById(2L)).thenReturn(true);
-        when(customerRepository.getReferenceById(2L)).thenReturn(new Customer());
-        when(warehouseRepository.getReferenceById(2L)).thenReturn(new Warehouse());
-        when(outboundOrderRepository.save(existingOrder)).thenReturn(existingOrder);
+        when(customerRepository.findById(2L)).thenReturn(Optional.of(customer));
+        when(warehouseRepository.findById(2L)).thenReturn(Optional.of(warehouse));
         when(outboundOrderMapper.toDto(existingOrder)).thenReturn(expectedDto);
 
-        OutboundOrderRequestDto result = outboundOrderService.editOutboundOrder(orderId, updateDto);
+        OutboundOrderDto result = outboundOrderService.editOutboundOrder(orderId, updateDto);
 
-        assertNotNull(result);
         assertEquals(expectedDto, result);
-        verify(outboundOrderRepository).findById(orderId);
-        verify(customerRepository).existsById(2L);
-        verify(warehouseRepository).existsById(2L);
-        verify(outboundOrderRepository).save(existingOrder);
+        assertSame(customer, existingOrder.getCustomer());
+        assertSame(warehouse, existingOrder.getWarehouse());
+        verify(outboundOrderRepository, never()).save(any());
     }
 
     @Test
     void editOutboundOrder_ShouldThrowException_WhenOrderNotFound() {
         Long orderId = 1L;
-        OutboundOrderRequestDto updateDto = new OutboundOrderRequestDto(orderId, 1L, 1L, 1L, "Updated", "NEW", LocalDateTime.now(), List.of());
+        OutboundOrderDto updateDto = new OutboundOrderDto(orderId, 1L, 1L, 1L, "Updated", OutboundStatus.NEW, LocalDateTime.now(), List.of());
 
         when(outboundOrderRepository.findById(orderId)).thenReturn(Optional.empty());
 
@@ -255,31 +266,71 @@ class OutboundOrderServiceTest {
     @Test
     void editOutboundOrder_ShouldThrowException_WhenCustomerNotFound() {
         Long orderId = 1L;
-        OutboundOrderRequestDto updateDto = new OutboundOrderRequestDto(orderId, 1L, 1L, 1L, "Updated", "NEW", LocalDateTime.now(), List.of());
+        OutboundOrderDto updateDto = new OutboundOrderDto(
+                orderId, 1L, 1L, 1L, "Updated", OutboundStatus.NEW, LocalDateTime.now(), List.of());
         OutboundOrder existingOrder = new OutboundOrder();
+        existingOrder.setStatus(OutboundStatus.NEW);
 
         when(outboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(customerRepository.existsById(1L)).thenReturn(false);
+        when(customerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> outboundOrderService.editOutboundOrder(orderId, updateDto));
-        verify(outboundOrderRepository).findById(orderId);
-        verify(customerRepository).existsById(1L);
+        assertThrows(ResourceNotFoundException.class,
+                () -> outboundOrderService.editOutboundOrder(orderId, updateDto));
+        verify(customerRepository).findById(1L);
         verifyNoInteractions(warehouseRepository);
     }
+
 
     @Test
     void editOutboundOrder_ShouldThrowException_WhenWarehouseNotFound() {
         Long orderId = 1L;
-        OutboundOrderRequestDto updateDto = new OutboundOrderRequestDto(orderId, 1L, 1L, 1L, "Updated", "NEW", LocalDateTime.now(), List.of());
+        OutboundOrderDto updateDto = new OutboundOrderDto(
+                orderId, 1L, 1L, 1L, "Updated", OutboundStatus.NEW, LocalDateTime.now(), List.of());
         OutboundOrder existingOrder = new OutboundOrder();
+        existingOrder.setStatus(OutboundStatus.NEW);
 
         when(outboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(customerRepository.existsById(1L)).thenReturn(true);
-        when(warehouseRepository.existsById(1L)).thenReturn(false);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(new Customer()));
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> outboundOrderService.editOutboundOrder(orderId, updateDto));
-        verify(outboundOrderRepository).findById(orderId);
-        verify(customerRepository).existsById(1L);
-        verify(warehouseRepository).existsById(1L);
+        assertThrows(ResourceNotFoundException.class,
+                () -> outboundOrderService.editOutboundOrder(orderId, updateDto));
+        verify(warehouseRepository).findById(1L);
+    }
+    @Test
+    void changeStatus_ShouldUpdateStatus_WhenTransitionAllowed() {
+        OutboundOrder order = new OutboundOrder();
+        order.setStatus(OutboundStatus.NEW);
+        OutboundOrderDto dto = new OutboundOrderDto(
+                1L, 1L, 1L, 1L, "c", OutboundStatus.IN_TRANSIT, LocalDateTime.now(), List.of());
+
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(outboundOrderMapper.toDto(order)).thenReturn(dto);
+
+        OutboundOrderDto result = outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT);
+
+        assertEquals(dto, result);
+        assertEquals(OutboundStatus.IN_TRANSIT, order.getStatus());
+    }
+
+    @Test
+    void changeStatus_ShouldThrow_WhenTransitionNotAllowed() {
+        OutboundOrder order = new OutboundOrder();
+        order.setStatus(OutboundStatus.SHIPPED);
+
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(IllegalStateException.class,
+                () -> outboundOrderService.changeStatus(1L, OutboundStatus.NEW));
+        assertEquals(OutboundStatus.SHIPPED, order.getStatus());
+        verifyNoInteractions(outboundOrderMapper);
+    }
+
+    @Test
+    void changeStatus_ShouldThrow_WhenOrderNotFound() {
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT));
     }
 }
