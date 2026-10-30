@@ -12,6 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "outbound_items")
 public class OutboundItem {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

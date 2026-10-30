@@ -23,8 +23,9 @@ public class OutboundOrder {
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
-    @Column(name = "status", nullable = false, length = Integer.MAX_VALUE)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private OutboundStatus status = OutboundStatus.NEW;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

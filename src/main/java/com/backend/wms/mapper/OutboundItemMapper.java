@@ -12,11 +12,13 @@ public interface OutboundItemMapper {
 
     @Mapping(source = "product.id", target = "productId")
     @Mapping(source = "order.id", target = "orderId")
+    @Mapping(source = "product.productName", target = "productName")
     OutboundItemDto toDto(OutboundItem entity);
 
     List<OutboundItemDto> toDtoList(List<OutboundItem> entities);
 
-    @Mapping(target = "product.id", source = "productId")
-    @Mapping(target = "order.id", source = "orderId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "order", ignore = true)
+    @Mapping(target = "product", ignore = true)
     OutboundItem toEntity(CreateOutboundItemDto dto);
 }

@@ -47,6 +47,10 @@ public class OutboundItemService {
             throw new ResourceNotFoundException("Outbound order not found with id: " + createOutboundItemDto.orderId());
         }
         OutboundItem outboundItem = outboundItemMapper.toEntity(createOutboundItemDto);
+        outboundItem.setOrder(outboundOrderRepository.findById(createOutboundItemDto.orderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found")));
+        outboundItem.setProduct(productRepository.findById(createOutboundItemDto.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
         OutboundItem savedOutboundItem = outboundItemRepository.save(outboundItem);
 
         return outboundItemMapper.toDto(savedOutboundItem);
