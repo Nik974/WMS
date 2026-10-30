@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.backend.wms.dto.CreateOutboundItemDto;
 import com.backend.wms.dto.OutboundItemDto;
 import com.backend.wms.entity.OutboundItem;
+import com.backend.wms.entity.OutboundOrder;
+import com.backend.wms.entity.Product;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.OutboundItemMapper;
 import com.backend.wms.repository.OutboundItemRepository;
@@ -44,7 +46,7 @@ class OutboundItemServiceTest {
         Long orderId = 1L;
         OutboundItem item = new OutboundItem();
         List<OutboundItem> items = List.of(item);
-        List<OutboundItemDto> expectedDtos = List.of(new OutboundItemDto(1L, orderId, 1L, 5));
+        List<OutboundItemDto> expectedDtos = List.of(new OutboundItemDto(1L, orderId, 1L, 5,null));
 
         when(outboundOrderRepository.existsById(orderId)).thenReturn(true);
         when(outboundItemRepository.findAllByOrderId(orderId)).thenReturn(items);
@@ -74,7 +76,7 @@ class OutboundItemServiceTest {
         Long productId = 1L;
         OutboundItem item = new OutboundItem();
         List<OutboundItem> items = List.of(item);
-        List<OutboundItemDto> expectedDtos = List.of(new OutboundItemDto(1L, 1L, productId, 3));
+        List<OutboundItemDto> expectedDtos = List.of(new OutboundItemDto(1L, 1L, productId, 3, null));
 
         when(productRepository.existsById(productId)).thenReturn(true);
         when(outboundItemRepository.findAllByProductId(productId)).thenReturn(items);
@@ -105,20 +107,24 @@ class OutboundItemServiceTest {
         OutboundItem entity = new OutboundItem();
         OutboundItem savedEntity = new OutboundItem();
         savedEntity.setId(1L);
-        OutboundItemDto expectedDto = new OutboundItemDto(1L, 1L, 1L, 2);
+        OutboundItemDto expectedDto = new OutboundItemDto(1L, 1L, 1L, 2, null);
+
+        OutboundOrder order = new OutboundOrder();
+        Product product = new Product();
 
         when(productRepository.existsById(1L)).thenReturn(true);
         when(outboundOrderRepository.existsById(1L)).thenReturn(true);
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(outboundItemMapper.toEntity(inputDto)).thenReturn(entity);
         when(outboundItemRepository.save(entity)).thenReturn(savedEntity);
         when(outboundItemMapper.toDto(savedEntity)).thenReturn(expectedDto);
 
         OutboundItemDto result = outboundItemService.createOutboundItem(inputDto);
 
-        assertNotNull(result);
         assertEquals(expectedDto, result);
-        verify(productRepository).existsById(1L);
-        verify(outboundOrderRepository).existsById(1L);
+        assertSame(order, entity.getOrder());
+        assertSame(product, entity.getProduct());
         verify(outboundItemRepository).save(entity);
     }
 
@@ -149,7 +155,7 @@ class OutboundItemServiceTest {
     @Test
     void updateOutboundItem_ShouldUpdateAndReturnDto_WhenValid() {
         Long itemId = 1L;
-        OutboundItemDto updateDto = new OutboundItemDto(itemId, 2L, 2L, 4);
+        OutboundItemDto updateDto = new OutboundItemDto(itemId, 2L, 2L, 4,null);
         OutboundItem existingItem = new OutboundItem();
         existingItem.setId(itemId);
 
@@ -172,7 +178,7 @@ class OutboundItemServiceTest {
     @Test
     void updateOutboundItem_ShouldThrowException_WhenItemNotFound() {
         Long itemId = 1L;
-        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2);
+        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2, null);
 
         when(outboundItemRepository.findById(itemId)).thenReturn(Optional.empty());
 
@@ -184,7 +190,7 @@ class OutboundItemServiceTest {
     @Test
     void updateOutboundItem_ShouldThrowException_WhenProductNotFound() {
         Long itemId = 1L;
-        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2);
+        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2, null);
         OutboundItem existingItem = new OutboundItem();
 
         when(outboundItemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
@@ -199,7 +205,7 @@ class OutboundItemServiceTest {
     @Test
     void updateOutboundItem_ShouldThrowException_WhenOrderNotFound() {
         Long itemId = 1L;
-        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2);
+        OutboundItemDto updateDto = new OutboundItemDto(itemId, 1L, 1L, 2, null);
         OutboundItem existingItem = new OutboundItem();
 
         when(outboundItemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
