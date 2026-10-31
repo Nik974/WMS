@@ -1,0 +1,37 @@
+.page { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+h1 { margin: 0; font: var(--mat-sys-headline-medium); }
+
+.filters { margin-bottom: 16px; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-top: 8px; }
+
+.table-card {
+  background: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-large);
+  overflow-x: auto;
+  table { width: 100%; background: transparent; min-width: 480px; }
+}
+.empty { text-align: center; padding: 32px; color: var(--mat-sys-on-surface-variant); }
+@media (max-width: 600px) {
+  .page { padding: 16px 12px; }
+  .page-header { flex-wrap: wrap; gap: 12px; }
+  .filter-row mat-form-field { width: 100%; }
+}
+.chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--mat-sys-corner-full);
+  font: var(--mat-sys-label-large);
+  white-space: nowrap;
+  &.NEW        { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
+  &.IN_TRANSIT { background: var(--mat-sys-tertiary-container);  color: var(--mat-sys-on-tertiary-container); }
+  &.SHIPPED    { background: var(--mat-sys-primary-container);   color: var(--mat-sys-on-primary-container); }
+  &.CANCELLED  { background: var(--mat-sys-error-container);     color: var(--mat-sys-on-error-container); }
+}
+
+.actions { white-space: nowrap; text-align: right; }
+tr.mat-mdc-row:not(.details-row) { cursor: pointer; }
+.details-row { height: 0; }
+.details-cell { padding: 0 !important; border-bottom-width: 0; }
+.details { padding: 8px 24px 16px; display: flex; flex-direction: column; gap: 4px; }
+.item { display: flex; justify-content: space-between; max-width: 420px; }
