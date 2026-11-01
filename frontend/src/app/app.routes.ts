@@ -8,6 +8,7 @@ import {Categories} from './categories/categories';
 import {Warehouses} from './warehouses/warehouses';
 import { Customers } from './customers/customers';
 import {Orders} from './orders/orders';
+import {Suppliers} from './suppliers/suppliers';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -20,4 +21,5 @@ export const routes: Routes = [
   { path: 'warehouses', component: Warehouses, canActivate: [roleGuard] },
   { path: 'customers', component: Customers, canActivate: [roleGuard] },
   { path: 'orders', component: Orders, canActivate: [roleGuard] },
+  { path: 'suppliers', component: Suppliers, canActivate: [roleGuard] },
 ];
