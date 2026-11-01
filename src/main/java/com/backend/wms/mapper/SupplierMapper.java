@@ -19,5 +19,7 @@ public interface SupplierMapper {
     @Mapping(source = "supplierId", target = "id")
     Supplier toEntity(SupplierDto supplierDto);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "taxId", ignore = true)
     void updateEntityFromDto(UpdateSupplierDto dto, @MappingTarget Supplier entity);
 }
