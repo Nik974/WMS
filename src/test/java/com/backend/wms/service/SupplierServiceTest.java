@@ -115,7 +115,7 @@ class SupplierServiceTest {
         when(supplierRepository.findById(1L)).thenReturn(of(existingSupplier));
         when(supplierRepository.existsByTaxIdAndIdNot("123456789", 1L)).thenReturn(true);
 
-        Exception exception = assertThrows(ResourceAlreadyInUse.class, () -> {
+        Exception exception = assertThrows(ResourceAlreadyExistsException.class, () -> {
             supplierService.updateSupplier(1L, updatedSupplierDto);
         });
 
@@ -169,11 +169,13 @@ class SupplierServiceTest {
         SupplierDto supplierDto1 = new SupplierDto(1L, "Supplier One", "111111111");
         SupplierDto supplierDto2 = new SupplierDto(2L, "Supplier Two", "222222222");
 
-        when(supplierRepository.findAllBySupplierNameContainingIgnoreCase(eq("Supplier One"), any(Sort.class))).thenReturn(List.of(supplier1, supplier2));
-        when(supplierMapper.toDto(supplier1)).thenReturn(supplierDto1);
-        when(supplierMapper.toDto(supplier2)).thenReturn(supplierDto2);
+        List<Supplier> suppliers = List.of(supplier1, supplier2);
 
-        java.util.List<SupplierDto> result = supplierService.searchSuppliersByName("Supplier One");
+        when(supplierRepository.findAllBySupplierNameContainingIgnoreCase(eq("Supplier One"), any(Sort.class)))
+                .thenReturn(suppliers);
+        when(supplierMapper.toDtoList(suppliers)).thenReturn(List.of(supplierDto1, supplierDto2));
+
+        List<SupplierDto> result = supplierService.searchSuppliersByName("Supplier One");
 
         assertEquals(2, result.size());
         assertTrue(result.contains(supplierDto1));
@@ -183,17 +185,14 @@ class SupplierServiceTest {
     void searchSuppliersByName_ShouldReturnEmptyList_WhenNoSuppliersFound() {
         String searchName = "NonExistentSupplier";
 
-        when(supplierRepository.findAllBySupplierNameContainingIgnoreCase(
-                eq(searchName),
-                any(Sort.class)
-        )).thenReturn(List.of());
+        when(supplierRepository.findAllBySupplierNameContainingIgnoreCase(eq(searchName), any(Sort.class)))
+                .thenReturn(List.of());
+        when(supplierMapper.toDtoList(List.of())).thenReturn(List.of());
 
         List<SupplierDto> result = supplierService.searchSuppliersByName(searchName);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        assertEquals(0, result.size());
-
-        verifyNoInteractions(supplierMapper);
+        verify(supplierMapper).toDtoList(List.of());
     }
 }
