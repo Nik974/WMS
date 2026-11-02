@@ -3,17 +3,18 @@ package com.backend.wms.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.backend.wms.dto.CreateInboundOrderDto;
+import com.backend.wms.dto.InboundItemDto;
 import com.backend.wms.dto.InboundOrderDto;
-import com.backend.wms.entity.InboundOrder;
-import com.backend.wms.entity.Supplier;
-import com.backend.wms.entity.Warehouse;
+import com.backend.wms.entity.*;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.InboundOrderMapper;
 import com.backend.wms.repository.InboundOrderRepository;
+import com.backend.wms.repository.ProductRepository;
 import com.backend.wms.repository.SupplierRepository;
 import com.backend.wms.repository.WarehouseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -42,12 +44,15 @@ class InboundOrderServiceTest {
     @Mock
     private SupplierRepository supplierRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     @Test
     void getAllInboundOrders_ShouldReturnListOfDtos() {
         InboundOrder order = new InboundOrder();
         List<InboundOrder> orders = List.of(order);
         List<InboundOrderDto> expectedDtos = List.of(
-                new InboundOrderDto(1L, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of())
+                new InboundOrderDto(1L, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of())
         );
 
         when(inboundOrderRepository.findAll()).thenReturn(orders);
@@ -67,7 +72,7 @@ class InboundOrderServiceTest {
         InboundOrder order = new InboundOrder();
         List<InboundOrder> orders = List.of(order);
         List<InboundOrderDto> expectedDtos = List.of(
-                new InboundOrderDto(1L, 1L, supplierId, "Supplier A", "NEW", LocalDateTime.now(), List.of())
+                new InboundOrderDto(1L, 1L, supplierId, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of())
         );
 
         when(supplierRepository.existsById(supplierId)).thenReturn(true);
@@ -98,7 +103,7 @@ class InboundOrderServiceTest {
         InboundOrder order = new InboundOrder();
         List<InboundOrder> orders = List.of(order);
         List<InboundOrderDto> expectedDtos = List.of(
-                new InboundOrderDto(1L, warehouseId, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of())
+                new InboundOrderDto(1L, warehouseId, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of())
         );
 
         when(warehouseRepository.existsById(warehouseId)).thenReturn(true);
@@ -125,11 +130,11 @@ class InboundOrderServiceTest {
 
     @Test
     void getInboundOrdersByStatus_ShouldReturnListOfDtos() {
-        String status = "NEW";
+        InboundStatus status = InboundStatus.NEW;
         InboundOrder order = new InboundOrder();
         List<InboundOrder> orders = List.of(order);
         List<InboundOrderDto> expectedDtos = List.of(
-                new InboundOrderDto(1L, 1L, 1L, "Supplier A", status, LocalDateTime.now(), List.of())
+                new InboundOrderDto(1L, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of())
         );
 
         when(inboundOrderRepository.findAllByStatus(status)).thenReturn(orders);
@@ -146,98 +151,102 @@ class InboundOrderServiceTest {
     void getInboundOrdersByCreatedBetween_ShouldReturnListOfDtos() {
         LocalDateTime start = LocalDateTime.now().minusDays(1);
         LocalDateTime end = LocalDateTime.now();
-        InboundOrder order = new InboundOrder();
-        List<InboundOrder> orders = List.of(order);
+        List<InboundOrder> orders = List.of(new InboundOrder());
         List<InboundOrderDto> expectedDtos = List.of(
-                new InboundOrderDto(1L, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of())
-        );
+                new InboundOrderDto(1L, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of()));
 
-        when(inboundOrderRepository.findTopByCreatedAtBetween(start, end)).thenReturn(orders);
+        when(inboundOrderRepository.findAllByCreatedAtBetween(start, end)).thenReturn(orders);
         when(inboundOrderMapper.toDtoList(orders)).thenReturn(expectedDtos);
 
         List<InboundOrderDto> result = inboundOrderService.getInboundOrdersByCreatedBetween(start, end);
 
-        assertNotNull(result);
         assertEquals(expectedDtos, result);
-        verify(inboundOrderRepository).findTopByCreatedAtBetween(start, end);
+        verify(inboundOrderRepository).findAllByCreatedAtBetween(start, end);
     }
 
     @Test
     void createInboundOrder_ShouldSaveAndReturnDto_WhenValid() {
-        CreateInboundOrderDto inputDto = new CreateInboundOrderDto(1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
-        InboundOrder entity = new InboundOrder();
-        InboundOrder savedEntity = new InboundOrder();
-        savedEntity.setId(1L);
-        InboundOrderDto expectedDto = new InboundOrderDto(1L, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        CreateInboundOrderDto dto = new CreateInboundOrderDto(
+                1L, 2L, null, null, null,
+                List.of(new InboundItemDto(null, null, 10L, 3, null)));
+        InboundOrderDto expectedDto = new InboundOrderDto(
+                1L, 1L, 2L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of());
 
-        when(warehouseRepository.existsById(1L)).thenReturn(true);
-        when(supplierRepository.existsById(1L)).thenReturn(true);
-        when(inboundOrderMapper.toEntity(inputDto)).thenReturn(entity);
-        when(inboundOrderRepository.save(entity)).thenReturn(savedEntity);
-        when(inboundOrderMapper.toDto(savedEntity)).thenReturn(expectedDto);
+        Warehouse warehouse = new Warehouse();
+        Supplier supplier = new Supplier();
+        Product product = new Product();
+        product.setId(10L);
 
-        InboundOrderDto result = inboundOrderService.createInboundOrder(inputDto);
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.of(warehouse));
+        when(supplierRepository.findById(2L)).thenReturn(Optional.of(supplier));
+        when(productRepository.findAllById(Set.of(10L))).thenReturn(List.of(product));
+        when(inboundOrderRepository.save(any(InboundOrder.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+        when(inboundOrderMapper.toDto(any(InboundOrder.class))).thenReturn(expectedDto);
 
-        assertNotNull(result);
+        InboundOrderDto result = inboundOrderService.createInboundOrder(dto);
+
         assertEquals(expectedDto, result);
-        verify(warehouseRepository).existsById(1L);
-        verify(supplierRepository).existsById(1L);
-        verify(inboundOrderRepository).save(entity);
+        ArgumentCaptor<InboundOrder> captor = ArgumentCaptor.forClass(InboundOrder.class);
+        verify(inboundOrderRepository).save(captor.capture());
+        assertEquals(InboundStatus.NEW, captor.getValue().getStatus());
+        assertEquals(1, captor.getValue().getItems().size());
     }
 
     @Test
     void createInboundOrder_ShouldThrowException_WhenWarehouseNotFound() {
-        CreateInboundOrderDto inputDto = new CreateInboundOrderDto(1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        CreateInboundOrderDto inputDto = new CreateInboundOrderDto(1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of());
 
-        when(warehouseRepository.existsById(1L)).thenReturn(false);
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> inboundOrderService.createInboundOrder(inputDto));
-        verify(warehouseRepository).existsById(1L);
+        verify(warehouseRepository).findById(1L);
         verifyNoInteractions(supplierRepository, inboundOrderRepository, inboundOrderMapper);
     }
 
     @Test
     void createInboundOrder_ShouldThrowException_WhenSupplierNotFound() {
-        CreateInboundOrderDto inputDto = new CreateInboundOrderDto(1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        CreateInboundOrderDto inputDto = new CreateInboundOrderDto(
+                1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(),
+                List.of(new InboundItemDto(null, null, 10L, 3, null)));
 
-        when(warehouseRepository.existsById(1L)).thenReturn(true);
-        when(supplierRepository.existsById(1L)).thenReturn(false);
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.of(new Warehouse()));
+        when(supplierRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> inboundOrderService.createInboundOrder(inputDto));
-        verify(warehouseRepository).existsById(1L);
-        verify(supplierRepository).existsById(1L);
+        verify(supplierRepository).findById(1L);
         verifyNoInteractions(inboundOrderRepository, inboundOrderMapper);
     }
+
 
     @Test
     void editInboundOrder_ShouldUpdateAndReturnDto_WhenValid() {
         Long orderId = 1L;
-        InboundOrderDto updateDto = new InboundOrderDto(orderId, 2L, 2L, "Supplier B", "PROCESSING", LocalDateTime.now(), List.of());
+        InboundOrderDto updateDto = new InboundOrderDto(
+                orderId, 2L, 2L, "Supplier B", InboundStatus.NEW, LocalDateTime.now(), List.of());
         InboundOrder existingOrder = new InboundOrder();
         existingOrder.setId(orderId);
+        existingOrder.setStatus(InboundStatus.NEW);
+        Warehouse warehouse = new Warehouse();
+        Supplier supplier = new Supplier();
 
         when(inboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(warehouseRepository.existsById(2L)).thenReturn(true);
-        when(supplierRepository.existsById(2L)).thenReturn(true);
-        when(warehouseRepository.getReferenceById(2L)).thenReturn(new Warehouse());
-        when(supplierRepository.getReferenceById(2L)).thenReturn(new Supplier());
-        when(inboundOrderRepository.save(existingOrder)).thenReturn(existingOrder);
+        when(warehouseRepository.findById(2L)).thenReturn(Optional.of(warehouse));
+        when(supplierRepository.findById(2L)).thenReturn(Optional.of(supplier));
         when(inboundOrderMapper.toDto(existingOrder)).thenReturn(updateDto);
 
         InboundOrderDto result = inboundOrderService.editInboundOrder(orderId, updateDto);
 
-        assertNotNull(result);
         assertEquals(updateDto, result);
-        verify(inboundOrderRepository).findById(orderId);
-        verify(warehouseRepository).existsById(2L);
-        verify(supplierRepository).existsById(2L);
-        verify(inboundOrderRepository).save(existingOrder);
+        assertSame(warehouse, existingOrder.getWarehouse());
+        assertSame(supplier, existingOrder.getSupplier());
+        verify(inboundOrderRepository, never()).save(any());
     }
 
     @Test
     void editInboundOrder_ShouldThrowException_WhenOrderNotFound() {
         Long orderId = 1L;
-        InboundOrderDto updateDto = new InboundOrderDto(orderId, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        InboundOrderDto updateDto = new InboundOrderDto(orderId, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of());
 
         when(inboundOrderRepository.findById(orderId)).thenReturn(Optional.empty());
 
@@ -249,31 +258,32 @@ class InboundOrderServiceTest {
     @Test
     void editInboundOrder_ShouldThrowException_WhenWarehouseNotFound() {
         Long orderId = 1L;
-        InboundOrderDto updateDto = new InboundOrderDto(orderId, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        InboundOrderDto updateDto = new InboundOrderDto(
+                orderId, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of());
         InboundOrder existingOrder = new InboundOrder();
+        existingOrder.setStatus(InboundStatus.NEW);
 
         when(inboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(warehouseRepository.existsById(1L)).thenReturn(false);
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> inboundOrderService.editInboundOrder(orderId, updateDto));
-        verify(inboundOrderRepository).findById(orderId);
-        verify(warehouseRepository).existsById(1L);
+        verify(warehouseRepository).findById(1L);
         verifyNoInteractions(supplierRepository);
     }
 
     @Test
     void editInboundOrder_ShouldThrowException_WhenSupplierNotFound() {
         Long orderId = 1L;
-        InboundOrderDto updateDto = new InboundOrderDto(orderId, 1L, 1L, "Supplier A", "NEW", LocalDateTime.now(), List.of());
+        InboundOrderDto updateDto = new InboundOrderDto(
+                orderId, 1L, 1L, "Supplier A", InboundStatus.NEW, LocalDateTime.now(), List.of());
         InboundOrder existingOrder = new InboundOrder();
+        existingOrder.setStatus(InboundStatus.NEW);
 
         when(inboundOrderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(warehouseRepository.existsById(1L)).thenReturn(true);
-        when(supplierRepository.existsById(1L)).thenReturn(false);
+        when(warehouseRepository.findById(1L)).thenReturn(Optional.of(new Warehouse()));
+        when(supplierRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> inboundOrderService.editInboundOrder(orderId, updateDto));
-        verify(inboundOrderRepository).findById(orderId);
-        verify(warehouseRepository).existsById(1L);
-        verify(supplierRepository).existsById(1L);
+        verify(supplierRepository).findById(1L);
     }
 }
