@@ -27,7 +27,8 @@ export class Dashboard {
     { label: 'Categories', icon: 'category', link: '/categories', enabled: true },
     { label: 'Warehouses', icon: 'warehouse', link: '/warehouses', enabled: true },
     { label: 'Customers', icon: 'groups', link: '/customers', enabled: true },
-    { label: 'Outbound orders', icon: 'local_shipping', link: '/orders', enabled: true },
+    { label: 'Outbound orders', icon: 'local_shipping', link: '/outbound-orders', enabled: true },
     { label: 'Suppliers', icon: 'local_shipping', link: '/suppliers', enabled: true },
+    { label: 'Inbound orders', icon: 'move_to_inbox', link: '/inbound-orders', enabled: true },
   ];
 }
