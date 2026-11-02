@@ -12,15 +12,9 @@ public interface InboundOrderMapper {
 
     @Mapping(source = "id", target = "orderId")
     @Mapping(source = "warehouse.id", target = "warehouseId")
-    @Mapping(source = "supplier.supplierName", target = "supplierName")
     @Mapping(source = "supplier.id", target = "supplierId")
+    @Mapping(source = "supplier.supplierName", target = "supplierName")
     InboundOrderDto toDto(InboundOrder entity);
 
-    List<InboundOrderDto> toDtoList(List<InboundOrder> entities);
-
-    @Mapping(source = "warehouseId", target = "warehouse.id")
-    @Mapping(source = "supplierId", target = "supplier.id")
-    @Mapping(source = "supplierName", target = "supplier.supplierName")
-    @Mapping(target = "id", ignore = true)
-    InboundOrder toEntity(CreateInboundOrderDto dto);
+    List<InboundOrderDto> toDtoList(List<InboundOrder> all);
 }

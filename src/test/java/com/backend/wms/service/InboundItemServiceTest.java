@@ -46,7 +46,7 @@ class InboundItemServiceTest {
         Long orderId = 1L;
         InboundItem item = new InboundItem();
         List<InboundItem> items = List.of(item);
-        List<InboundItemDto> expectedDtos = List.of(new InboundItemDto(1L, orderId, 1L, 5));
+        List<InboundItemDto> expectedDtos = List.of(new InboundItemDto(1L, orderId, 1L, 5, null));
 
         when(inboundOrderRepository.existsById(orderId)).thenReturn(true);
         when(inboundItemRepository.findAllByOrderId(orderId)).thenReturn(items);
@@ -75,7 +75,7 @@ class InboundItemServiceTest {
         Long productId = 1L;
         InboundItem item = new InboundItem();
         List<InboundItem> items = List.of(item);
-        List<InboundItemDto> expectedDtos = List.of(new InboundItemDto(1L, 1L, productId, 5));
+        List<InboundItemDto> expectedDtos = List.of(new InboundItemDto(1L, 1L, productId, 5, null));
 
         when(productRepository.existsById(productId)).thenReturn(true);
         when(inboundItemRepository.findAllByProductId(productId)).thenReturn(items);
@@ -104,7 +104,7 @@ class InboundItemServiceTest {
         CreateInboundItemDto inputDto = new CreateInboundItemDto(1L, 1L, 10);
         InboundItem entity = new InboundItem();
         InboundItem savedEntity = new InboundItem();
-        InboundItemDto expectedDto = new InboundItemDto(1L, 1L, 1L, 10);
+        InboundItemDto expectedDto = new InboundItemDto(1L, 1L, 1L, 10, null);
 
         when(productRepository.existsById(1L)).thenReturn(true);
         when(inboundOrderRepository.existsById(1L)).thenReturn(true);
@@ -148,7 +148,7 @@ class InboundItemServiceTest {
     @Test
     void updateInboundItem_ShouldUpdateAndReturnDto_WhenValid() {
         Long itemId = 1L;
-        InboundItemDto updateDto = new InboundItemDto(itemId, 1L, 1L, 20);
+        InboundItemDto updateDto = new InboundItemDto(itemId, 1L, 1L, 20, null);
         InboundItem existingItem = new InboundItem();
 
         when(inboundItemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
@@ -172,7 +172,7 @@ class InboundItemServiceTest {
     @Test
     void updateInboundItem_ShouldThrowException_WhenItemNotFound() {
         Long itemId = 1L;
-        InboundItemDto updateDto = new InboundItemDto(itemId, 1L, 1L, 20);
+        InboundItemDto updateDto = new InboundItemDto(itemId, 1L, 1L, 20, null);
 
         when(inboundItemRepository.findById(itemId)).thenReturn(Optional.empty());
 

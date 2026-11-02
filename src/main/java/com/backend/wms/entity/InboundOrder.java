@@ -27,8 +27,9 @@ public class InboundOrder {
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 
-    @Column(name = "status", nullable = false, length = Integer.MAX_VALUE)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private InboundStatus status = InboundStatus.NEW;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
