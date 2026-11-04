@@ -129,7 +129,7 @@ class LocationServiceTest {
         when(warehouseRepository.getReferenceById(warehouseId)).thenReturn(mockWarehouseProxy);
         when(locationMapper.toDto(existingLocation)).thenReturn(updateDto);
 
-        LocationDto result = locationService.updateLocation(updateDto);
+        LocationDto result = locationService.updateLocation(locationId,updateDto);
 
         assertThat(result).isNotNull();
         assertThat(existingLocation.getWarehouse()).isEqualTo(mockWarehouseProxy);
@@ -145,7 +145,7 @@ class LocationServiceTest {
 
         when(locationRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> locationService.updateLocation(updateDto))
+        assertThatThrownBy(() -> locationService.updateLocation(99L, updateDto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Location not found");
 
@@ -162,7 +162,7 @@ class LocationServiceTest {
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(existingLocation));
         when(warehouseRepository.findById(warehouseId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> locationService.updateLocation(updateDto))
+        assertThatThrownBy(() -> locationService.updateLocation(locationId,updateDto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Warehouse not found");
 
@@ -175,32 +175,42 @@ class LocationServiceTest {
         Long warehouseId = 10L;
         Location loc1 = createLocation(1L);
         Location loc2 = createLocation(2L);
+        List<Location> locations = List.of(loc1, loc2);
 
         LocationDto dto1 = createLocationDto(1L, warehouseId);
         LocationDto dto2 = createLocationDto(2L, warehouseId);
 
-        when(locationRepository.findAllByWarehouseId(warehouseId)).thenReturn(List.of(loc1, loc2));
-        when(locationMapper.toDto(loc1)).thenReturn(dto1);
-        when(locationMapper.toDto(loc2)).thenReturn(dto2);
+        when(warehouseRepository.existsById(warehouseId)).thenReturn(true);
+        when(locationRepository.findAllByWarehouseId(warehouseId)).thenReturn(locations);
+        when(locationMapper.toDtoList(locations)).thenReturn(List.of(dto1, dto2));
 
         List<LocationDto> result = locationService.getAllLocationsByWarehouseId(warehouseId);
 
-        assertThat(result).hasSize(2);
         assertThat(result).containsExactly(dto1, dto2);
-
-        verify(locationRepository, times(1)).findAllByWarehouseId(warehouseId);
+        verify(warehouseRepository).existsById(warehouseId);
+        verify(locationRepository).findAllByWarehouseId(warehouseId);
     }
 
     @Test
     void getAllLocationsByWarehouseId_EmptyResult() {
         Long warehouseId = 10L;
+
+        when(warehouseRepository.existsById(warehouseId)).thenReturn(true);
         when(locationRepository.findAllByWarehouseId(warehouseId)).thenReturn(List.of());
+        when(locationMapper.toDtoList(List.of())).thenReturn(List.of());
 
         List<LocationDto> result = locationService.getAllLocationsByWarehouseId(warehouseId);
 
         assertThat(result).isEmpty();
-        verify(locationRepository, times(1)).findAllByWarehouseId(warehouseId);
-        verifyNoInteractions(locationMapper);
+        verify(locationRepository).findAllByWarehouseId(warehouseId);
+    }
+    @Test
+    void getAllLocationsByWarehouseId_ShouldThrow_WhenWarehouseNotFound() {
+        when(warehouseRepository.existsById(10L)).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> locationService.getAllLocationsByWarehouseId(10L));
+        verifyNoInteractions(locationRepository, locationMapper);
     }
 
 }
