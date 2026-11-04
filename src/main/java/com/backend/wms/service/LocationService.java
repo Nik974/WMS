@@ -34,8 +34,8 @@ public class LocationService {
     }
 
     @Transactional
-    public LocationDto updateLocation(LocationDto locationDto){
-        Location location = locationRepository.findById(locationDto.locationId())
+    public LocationDto updateLocation(Long id, LocationDto locationDto){
+        Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
         if(warehouseRepository.findById(locationDto.warehouseId()).isEmpty()){
             throw new ResourceNotFoundException("Warehouse not found");
@@ -54,9 +54,10 @@ public class LocationService {
     }
 
     public List<LocationDto> getAllLocationsByWarehouseId(Long warehouseId) {
-        return locationRepository.findAllByWarehouseId(warehouseId).stream()
-                .map(locationMapper::toDto)
-                .toList();
+        if (!warehouseRepository.existsById(warehouseId)) {
+            throw new ResourceNotFoundException("Warehouse not found");
+        }
+        return locationMapper.toDtoList(locationRepository.findAllByWarehouseId(warehouseId));
     }
 
 }
