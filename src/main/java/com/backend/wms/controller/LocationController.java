@@ -25,7 +25,7 @@ public class LocationController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<LocationDto> createLocation(@RequestBody LocationDto dto){
+    public ResponseEntity<LocationDto> createLocation(@Valid @RequestBody LocationDto dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(locationService.addLocation(dto));
     }
 
