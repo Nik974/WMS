@@ -10,6 +10,7 @@ import { Customers } from './customers/customers';
 import {Orders} from './orders/orders';
 import {Suppliers} from './suppliers/suppliers';
 import {InboundOrders} from './inbound-orders/inbound-orders';
+import {Locations} from './locations/locations';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -24,4 +25,5 @@ export const routes: Routes = [
   { path: 'outbound-orders', component: Orders, canActivate: [roleGuard] },
   { path: 'suppliers', component: Suppliers, canActivate: [roleGuard] },
   { path: 'inbound-orders', component: InboundOrders, canActivate: [roleGuard] },
+  { path: 'locations', component: Locations, canActivate: [roleGuard] },
 ];
