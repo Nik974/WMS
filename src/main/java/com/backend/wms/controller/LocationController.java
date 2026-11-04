@@ -19,8 +19,8 @@ public class LocationController {
     private final LocationService locationService;
 
     @GetMapping
-    public ResponseEntity<List<LocationDto>> getLocationsByWarehouseId(@RequestParam Long id){
-        return ResponseEntity.ok(locationService.getAllLocationsByWarehouseId(id));
+    public ResponseEntity<List<LocationDto>> getLocationsByWarehouseId(@RequestParam Long warehouseId){
+        return ResponseEntity.ok(locationService.getAllLocationsByWarehouseId(warehouseId));
     }
 
     @PostMapping
