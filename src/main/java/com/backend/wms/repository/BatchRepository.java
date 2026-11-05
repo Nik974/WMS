@@ -6,14 +6,16 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface BatchRepository extends JpaRepository<Batch, Long> {
     List<Batch> findAllByProductId(Long productId);
 
-    Optional<Batch> findByLotNumber(String lotNumber);
+    List<Batch> findByLotNumber(String lotNumber);
 
     List<Batch> findAllByExpiryDateBefore(LocalDate date);
 
+    boolean existsByProductIdAndLotNumber(Long productId, String lotNumber);
+
+    boolean existsByProductIdAndLotNumberAndIdNot(Long productId, String lotNumber, Long id);
 }
