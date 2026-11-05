@@ -23,14 +23,14 @@ export class Dashboard {
   auth = inject(AuthService);
 
   tiles: Tile[] = [
-    { label: 'Products', icon: 'inventory_2', link: '/products', enabled: true },
-    { label: 'Categories', icon: 'category', link: '/categories', enabled: true },
-    { label: 'Warehouses', icon: 'warehouse', link: '/warehouses', enabled: true },
-    { label: 'Customers', icon: 'groups', link: '/customers', enabled: true },
-    { label: 'Outbound orders', icon: 'local_shipping', link: '/outbound-orders', enabled: true },
-    { label: 'Suppliers', icon: 'local_shipping', link: '/suppliers', enabled: true },
-    { label: 'Inbound orders', icon: 'move_to_inbox', link: '/inbound-orders', enabled: true },
-    { label: 'Locations', icon: 'pin_drop', link: '/locations', enabled: true },
-    { label: 'Batches', icon: 'event_note', link: '/batches', enabled: true },
+    {label: 'Products', icon: 'inventory_2', link: '/products', enabled: true},
+    {label: 'Categories', icon: 'category', link: '/categories', enabled: true},
+    {label: 'Batches', icon: 'event_note', link: '/batches', enabled: true},
+    {label: 'Warehouses', icon: 'warehouse', link: '/warehouses', enabled: true},
+    {label: 'Locations', icon: 'pin_drop', link: '/locations', enabled: true},
+    {label: 'Customers', icon: 'groups', link: '/customers', enabled: true},
+    {label: 'Suppliers', icon: 'store', link: '/suppliers', enabled: true},
+    {label: 'Outbound orders', icon: 'output', link: '/outbound-orders', enabled: true},
+    {label: 'Inbound orders', icon: 'system_update_alt', link: '/inbound-orders', enabled: true},
   ];
 }
