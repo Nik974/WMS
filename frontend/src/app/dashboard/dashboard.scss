@@ -39,3 +39,26 @@ h1 {
     margin-right: 12px;
   }
 }
+
+@media (min-width: 900px) {
+  .page { max-width: 1000px; }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .tile {
+    --mat-button-filled-container-height: 120px;
+    height: 120px;
+
+    ::ng-deep .mdc-button__label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    mat-icon { margin-right: 0; font-size: 36px; width: 36px; height: 36px; }
+  }
+}
