@@ -31,5 +31,6 @@ export class Dashboard {
     { label: 'Suppliers', icon: 'local_shipping', link: '/suppliers', enabled: true },
     { label: 'Inbound orders', icon: 'move_to_inbox', link: '/inbound-orders', enabled: true },
     { label: 'Locations', icon: 'pin_drop', link: '/locations', enabled: true },
+    { label: 'Batches', icon: 'event_note', link: '/batches', enabled: true },
   ];
 }
