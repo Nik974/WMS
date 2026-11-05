@@ -4,6 +4,7 @@ import com.backend.wms.dto.BatchDto;
 import com.backend.wms.entity.Batch;
 import com.backend.wms.entity.Product;
 import com.backend.wms.entity.Supplier;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.BatchMapper;
 import com.backend.wms.repository.BatchRepository;
@@ -28,9 +29,16 @@ public class BatchService {
     @Transactional
     public BatchDto createBatch(BatchDto dto) {
         Product product = getProduct(dto.productId());
-        Supplier supplier = getSupplierOrNull(dto.supplierId());
+        String lot = dto.lotNumber().trim();
 
+        if (batchRepository.existsByProductIdAndLotNumber(product.getId(), lot)) {
+            throw new ResourceAlreadyExistsException(
+                    "Batch with lot number " + lot + " already exists for this product");
+        }
+
+        Supplier supplier = getSupplierOrNull(dto.supplierId());
         Batch batch = batchMapper.toEntity(dto, product, supplier);
+        batch.setLotNumber(lot);
         return batchMapper.toDto(batchRepository.save(batch));
     }
 
@@ -40,9 +48,20 @@ public class BatchService {
         Batch batch = batchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + id));
 
+        if (!batch.getProduct().getId().equals(dto.productId())) {
+            throw new IllegalStateException("Product of an existing batch cannot be changed");
+        }
+        String lot = dto.lotNumber().trim();
+        if (batchRepository.existsByProductIdAndLotNumberAndIdNot(
+                batch.getProduct().getId(), lot, id)) {
+            throw new ResourceAlreadyExistsException(
+                    "Batch with lot number " + lot + " already exists for this product");
+        }
+
         Supplier supplier = getSupplierOrNull(dto.supplierId());
         batchMapper.updateEntity(dto, supplier, batch);
 
+        batch.setLotNumber(lot);
         return batchMapper.toDto(batch);
     }
 
@@ -58,10 +77,12 @@ public class BatchService {
         return batchMapper.toDtoList(batchRepository.findAllByExpiryDateBefore(date));
     }
 
-    public BatchDto getBatchByLotNumber(String lotNumber) {
-        Batch batch = batchRepository.findByLotNumber(lotNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Batch not found with lot number: " + lotNumber));
-        return batchMapper.toDto(batch);
+    public List<BatchDto> getBatchByLotNumber(String lotNumber) {
+        List<Batch> list = batchRepository.findByLotNumber(lotNumber);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Batch not found with lot number: " + lotNumber);
+        }
+        return batchMapper.toDtoList(list);
     }
 
     public BatchDto getBatchById(Long id) {

@@ -4,6 +4,7 @@ import com.backend.wms.dto.BatchDto;
 import com.backend.wms.entity.Batch;
 import com.backend.wms.entity.Product;
 import com.backend.wms.entity.Supplier;
+import com.backend.wms.exception.ResourceAlreadyExistsException;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.BatchMapper;
 import com.backend.wms.repository.BatchRepository;
@@ -77,6 +78,8 @@ class BatchServiceTest {
 
         verify(productRepository).findById(productId);
         verifyNoInteractions(supplierRepository);
+        verify(batchRepository).save(mappedEntity);
+        assertEquals("BATCH123", mappedEntity.getLotNumber());
     }
 
     @Test
@@ -131,56 +134,36 @@ class BatchServiceTest {
     }
 
     @Test
-    void updateBatch_ShouldUpdateBatchAndIgnoreProduct_WhenBatchAndSupplierExist() {
+    void updateBatch_ShouldUpdateBatch_WhenBatchAndSupplierExist() {
         Long batchId = 1L;
-        Long originalProductId = 10L;
+        Long productId = 10L;
         Long newSupplierId = 20L;
 
-        Product originalProduct = new Product();
-        originalProduct.setId(originalProductId);
-        originalProduct.setProductName("Original Product");
+        Product product = new Product();
+        product.setId(productId);
+        product.setProductName("Original Product");
 
         Batch existingBatch = new Batch();
         existingBatch.setId(batchId);
-        existingBatch.setProduct(originalProduct);
+        existingBatch.setProduct(product);
         existingBatch.setLotNumber("LOT_OLD");
         existingBatch.setExpiryDate(LocalDate.now().plusDays(10));
 
         Supplier newSupplier = new Supplier();
         newSupplier.setId(newSupplierId);
 
-        BatchDto updateDto = new BatchDto(
-                batchId,999L,"LOT_NEW", LocalDate.now().plusDays(60), newSupplierId);
-
-        BatchDto expectedDto = new BatchDto(
-                batchId,originalProductId, "LOT_NEW", LocalDate.now().plusDays(60), newSupplierId);
+        LocalDate newExpiry = LocalDate.now().plusDays(60);
+        BatchDto updateDto = new BatchDto(batchId, productId, "LOT_NEW", newExpiry, newSupplierId);
 
         when(batchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(supplierRepository.findById(newSupplierId)).thenReturn(Optional.of(newSupplier));
-
-        doAnswer(invocation -> {
-            existingBatch.setLotNumber(updateDto.lotNumber());
-            existingBatch.setExpiryDate(updateDto.expiryDate());
-            existingBatch.setSupplier(newSupplier);
-            return null;
-        }).when(batchMapper).updateEntity(updateDto, newSupplier, existingBatch);
-
-        when(batchMapper.toDto(existingBatch)).thenReturn(expectedDto);
+        when(batchMapper.toDto(existingBatch)).thenReturn(updateDto);
 
         BatchDto result = batchService.updateBatch(batchId, updateDto);
 
-        assertNotNull(result);
-        assertEquals(expectedDto, result);
-
-        assertEquals(originalProductId, existingBatch.getProduct().getId());
-        assertEquals("Original Product", existingBatch.getProduct().getProductName());
-
-        verifyNoInteractions(productRepository);
-
-        verify(batchRepository).findById(batchId);
-        verify(supplierRepository).findById(newSupplierId);
+        assertEquals(updateDto, result);
         verify(batchMapper).updateEntity(updateDto, newSupplier, existingBatch);
-        verify(batchMapper).toDto(existingBatch);
+        verifyNoInteractions(productRepository);
     }
 
     @Test
@@ -231,8 +214,12 @@ class BatchServiceTest {
         Long batchId = 1L;
         Long nonExistentSupplierId = 888L;
 
+        Product product = new Product();
+        product.setId(10L);
+
         Batch existingBatch = new Batch();
         existingBatch.setId(batchId);
+        existingBatch.setProduct(product);
 
         BatchDto updateDto = new BatchDto(
                 batchId, 10L, "LOT", LocalDate.now(), nonExistentSupplierId);
@@ -352,5 +339,61 @@ class BatchServiceTest {
 
         verify(batchRepository).findAllByExpiryDateBefore(thresholdDate);
         verify(batchMapper).toDtoList(entityList);
+    }
+
+    @Test
+    void updateBatch_ShouldThrow_WhenProductChanged() {
+        Product product = new Product();
+        product.setId(10L);
+        Batch batch = new Batch();
+        batch.setProduct(product);
+        BatchDto dto = new BatchDto(1L, 999L, "LOT", null, 20L);
+
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(batch));
+
+        assertThrows(IllegalStateException.class, () -> batchService.updateBatch(1L, dto));
+        verifyNoInteractions(supplierRepository, batchMapper);
+    }
+
+    @Test
+    void createBatch_ShouldThrow_WhenLotAlreadyExistsForProduct() {
+        Product product = new Product();
+        product.setId(1L);
+        BatchDto dto = new BatchDto(null, 1L, " LOT-1 ", null, null);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(batchRepository.existsByProductIdAndLotNumber(1L, "LOT-1")).thenReturn(true);
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> batchService.createBatch(dto));
+        verify(batchRepository, never()).save(any());
+        verifyNoInteractions(batchMapper);
+    }
+
+    @Test
+    void updateBatch_ShouldThrow_WhenLotAlreadyExistsForProduct() {
+        Product product = new Product();
+        product.setId(10L);
+        Batch batch = new Batch();
+        batch.setProduct(product);
+        BatchDto dto = new BatchDto(1L, 10L, "LOT-2", null, null);
+
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(batch));
+        when(batchRepository.existsByProductIdAndLotNumberAndIdNot(10L, "LOT-2", 1L)).thenReturn(true);
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> batchService.updateBatch(1L, dto));
+        verify(batchMapper, never()).updateEntity(any(), any(), any());
+    }
+
+    @Test
+    void getBatchesByLotNumber_ShouldReturnAllMatches() {
+        List<Batch> batches = List.of(new Batch(), new Batch());
+        List<BatchDto> dtos = List.of(
+                new BatchDto(1L, 10L, "LOT", null, null),
+                new BatchDto(2L, 11L, "LOT", null, null));
+
+        when(batchRepository.findByLotNumber("LOT")).thenReturn(batches);
+        when(batchMapper.toDtoList(batches)).thenReturn(dtos);
+
+        assertEquals(dtos, batchService.getBatchByLotNumber("LOT"));
     }
 }
