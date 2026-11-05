@@ -1,0 +1,98 @@
+<app-header />
+
+<main class="page">
+  <div class="page-header">
+    <h1>Batches</h1>
+    @if (canEdit()) {
+      <button mat-flat-button (click)="openDialog()">
+        <mat-icon>add</mat-icon> Add batch
+      </button>
+    }
+  </div>
+
+  <mat-expansion-panel class="filters">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Search</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="filterForm" class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Lot number</mat-label>
+        <input matInput formControlName="lot" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Product</mat-label>
+        <mat-select formControlName="productId">
+          <mat-option [value]="null">All</mat-option>
+          @for (p of products(); track p.productId) {
+            <mat-option [value]="p.productId">{{ p.productName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Expiry</mat-label>
+        <mat-select formControlName="expiry">
+          <mat-option value="">All</mat-option>
+          <mat-option value="soon">Expiring soon (30 days)</mat-option>
+          <mat-option value="expired">Expired</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-button type="button" (click)="clearFilters()">Clear</button>
+    </form>
+  </mat-expansion-panel>
+
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource">
+      <ng-container matColumnDef="lotNumber">
+        <th mat-header-cell *matHeaderCellDef>Lot</th>
+        <td mat-cell *matCellDef="let b">{{ b.lotNumber }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="product">
+        <th mat-header-cell *matHeaderCellDef>Product</th>
+        <td mat-cell *matCellDef="let b">{{ productName(b.productId) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="expiryDate">
+        <th mat-header-cell *matHeaderCellDef>Expiry</th>
+        <td mat-cell *matCellDef="let b">
+          @if (b.expiryDate) {
+            <span [class]="'chip ' + expiryState(b)">{{ b.expiryDate | date: 'dd.MM.yyyy' }}</span>
+          } @else {
+            —
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="supplier">
+        <th mat-header-cell *matHeaderCellDef>Supplier</th>
+        <td mat-cell *matCellDef="let b">{{ supplierName(b.supplierId) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let b">
+          @if (canEdit()) {
+            <button mat-icon-button (click)="openDialog(b)" aria-label="Edit batch">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="empty" [attr.colspan]="columns.length">
+          {{ loading() ? 'Loading...' : 'No batches found' }}
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page" />
+  </div>
+</main>
