@@ -12,14 +12,15 @@ import {Suppliers} from './suppliers/suppliers';
 import {InboundOrders} from './inbound-orders/inbound-orders';
 import {Locations} from './locations/locations';
 import {Batches} from './batches/batches';
+import {Home} from './home/home';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: Dashboard, canActivate: [roleGuard] },
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'products', component: Products, canActivate: [roleGuard] },
-  { path: '', redirectTo: 'products', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: Home },
   { path: 'categories', component: Categories, canActivate: [roleGuard] },
   { path: 'warehouses', component: Warehouses, canActivate: [roleGuard] },
   { path: 'customers', component: Customers, canActivate: [roleGuard] },
@@ -28,4 +29,5 @@ export const routes: Routes = [
   { path: 'inbound-orders', component: InboundOrders, canActivate: [roleGuard] },
   { path: 'locations', component: Locations, canActivate: [roleGuard] },
   { path: 'batches', component: Batches, canActivate: [roleGuard] },
+  { path: '**', redirectTo: '' }
 ];
