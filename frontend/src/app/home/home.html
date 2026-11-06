@@ -1,0 +1,90 @@
+<div class="landing-layout">
+  <mat-toolbar>
+    <span>WMS</span>
+    <span class="spacer"></span>
+    @if (auth.isLoggedIn()) {
+      <a mat-button routerLink="/dashboard">Dashboard</a>
+    } @else {
+      <a mat-button routerLink="/login">Login</a>
+      <a mat-button routerLink="/register">Register</a>
+    }
+  </mat-toolbar>
+
+  <main class="hero-section">
+    <h1 class="title">Modern warehouse management</h1>
+    <p class="subtitle">Track products, batches, orders and locations in one place.</p>
+
+    <div class="hero-actions">
+      <a mat-flat-button routerLink="/login">
+        <mat-icon>rocket_launch</mat-icon>
+        {{ auth.isLoggedIn() ? 'Open dashboard' : 'Launch' }}
+      </a>
+      @if (!auth.isLoggedIn()) {
+        <a mat-stroked-button routerLink="/register">Create account</a>
+      }
+    </div>
+  </main>
+
+  <section class="section">
+    <h2>What you can do</h2>
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+      @for (f of features; track f.label) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">{{ f.icon }}</mat-icon>
+            {{ f.label }}
+          </ng-template>
+
+          <mat-card class="feature-card" appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>{{ f.title }}</mat-card-title>
+              <mat-card-subtitle>{{ f.text }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <ul>
+                @for (p of f.points; track p) {
+                  <li><mat-icon>check_circle</mat-icon>{{ p }}</li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+      }
+    </mat-tab-group>
+  </section>
+
+  <section class="section">
+    <h2>How it works</h2>
+    <div class="grid">
+      @for (s of steps; track s.title) {
+        <div class="step">
+          <mat-icon>{{ s.icon }}</mat-icon>
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.text }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Built for every role</h2>
+    <div class="grid">
+      @for (r of roles; track r.name) {
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>{{ r.icon }}</mat-icon>
+            <mat-card-title>{{ r.name }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content><p>{{ r.text }}</p></mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Ready to get your warehouse in order?</h2>
+    <a mat-flat-button routerLink="/register">Get started</a>
+  </section>
+
+  <footer class="footer">© {{ year }} WMS</footer>
+</div>
