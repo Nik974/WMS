@@ -58,7 +58,7 @@ export class LoginComponent {
         this.errorMessage.set(
           err.status === 401 || err.status === 403
             ? 'Wrong username or password'
-            : 'Something went wrong. Try again later',
+            : 'Something went wrong or Your account is blocked',
         );
       },
     });
