@@ -15,9 +15,6 @@ public record RegisterRequest(
         @NotBlank(message = "email cannot be null")
         String email,
 
-        @NotBlank(message = "role cannot be null")
-        String role,
-
         @NotBlank
         String password,
         LocalDateTime createdAt
