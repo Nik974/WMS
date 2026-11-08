@@ -7,5 +7,6 @@ public record UserDto(
         String username,
         String email,
         String role,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean enabled
 ) {}
