@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ interface Tile {
   icon: string;
   link: string;
   enabled: boolean;
+  roles?: string[];
 }
 
 @Component({
@@ -22,7 +23,7 @@ interface Tile {
 export class Dashboard {
   auth = inject(AuthService);
 
-  tiles: Tile[] = [
+  private allTiles: Tile[] = [
     {label: 'Products', icon: 'inventory_2', link: '/products', enabled: true},
     {label: 'Categories', icon: 'category', link: '/categories', enabled: true},
     {label: 'Batches', icon: 'event_note', link: '/batches', enabled: true},
@@ -32,5 +33,12 @@ export class Dashboard {
     {label: 'Suppliers', icon: 'store', link: '/suppliers', enabled: true},
     {label: 'Outbound orders', icon: 'output', link: '/outbound-orders', enabled: true},
     {label: 'Inbound orders', icon: 'system_update_alt', link: '/inbound-orders', enabled: true},
+    { label: 'Users', icon: 'manage_accounts', link: '/users', enabled: true, roles: ['ADMIN'] },
   ];
+
+  tiles = computed(() => {
+    const role = (this.auth.session()?.role ?? '').toUpperCase().replace('ROLE_', '');
+    return this.allTiles.filter((t) => !t.roles || t.roles.includes(role));
+  });
+
 }

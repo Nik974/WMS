@@ -13,6 +13,7 @@ import {InboundOrders} from './inbound-orders/inbound-orders';
 import {Locations} from './locations/locations';
 import {Batches} from './batches/batches';
 import {Home} from './home/home';
+import {Users} from './admin/users';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -29,5 +30,6 @@ export const routes: Routes = [
   { path: 'inbound-orders', component: InboundOrders, canActivate: [roleGuard] },
   { path: 'locations', component: Locations, canActivate: [roleGuard] },
   { path: 'batches', component: Batches, canActivate: [roleGuard] },
+  { path: 'users', component: Users, canActivate: [roleGuard, roleGuard('ADMIN')] },
   { path: '**', redirectTo: '' }
 ];
