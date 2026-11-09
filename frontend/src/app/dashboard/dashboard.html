@@ -4,7 +4,7 @@
   <h1>Welcome, {{ auth.session()?.username }}</h1>
 
   <nav class="tiles">
-    @for (tile of tiles; track tile.link) {
+    @for (tile of tiles(); track tile.link) {
       @if (tile.enabled) {
         <a mat-flat-button class="tile" [routerLink]="tile.link">
           <mat-icon>{{ tile.icon }}</mat-icon>
