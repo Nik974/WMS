@@ -1,24 +1,23 @@
-import { AfterViewInit, Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Header } from '../shared/header/header';
-import { AuthService } from '../auth/auth.service';
-import { WarehouseService } from '../warehouses/warehouse.service';
-import {
-  INBOUND_LABELS, INBOUND_TRANSITIONS, InboundOrder, InboundService, InboundStatus,
-} from './inbound.service';
-import { InboundDialog } from './inbound-dialog';
+import {AfterViewInit, Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {DatePipe} from '@angular/common';
+import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatSelectModule} from '@angular/material/select';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Header} from '../shared/header/header';
+import {AuthService} from '../auth/auth.service';
+import {WarehouseService} from '../warehouses/warehouse.service';
+import {INBOUND_LABELS, INBOUND_TRANSITIONS, InboundOrder, InboundService, InboundStatus,} from './inbound.service';
+import {InboundDialog} from './inbound-dialog';
+import {ReceiveDialog} from './receive-dialog';
 
 @Component({
   selector: 'app-inbound-orders',
@@ -102,6 +101,16 @@ export class InboundOrders implements OnInit, AfterViewInit {
       .afterClosed().subscribe((saved) => {
       if (saved) {
         this.snack.open('Inbound order created', 'OK', { duration: 3000 });
+        this.load();
+      }
+    });
+  }
+
+  openReceive(order: InboundOrder) {
+    this.dialog.open(ReceiveDialog, {data: order, width: '520px', maxWidth: '95vw'})
+      .afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.snack.open(`Order #${order.orderId} received`, 'OK', {duration: 3000});
         this.load();
       }
     });

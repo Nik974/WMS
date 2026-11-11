@@ -76,6 +76,11 @@
               }
             </mat-menu>
           }
+          @if (canEdit() && o.status === 'NEW') {
+            <button mat-icon-button (click)="openReceive(o); $event.stopPropagation()" aria-label="Receive order">
+              <mat-icon>inventory</mat-icon>
+            </button>
+          }
           <button mat-icon-button (click)="toggle(o.orderId); $event.stopPropagation()" aria-label="Show items">
             <mat-icon>{{ expandedId() === o.orderId ? 'expand_less' : 'expand_more' }}</mat-icon>
           </button>
