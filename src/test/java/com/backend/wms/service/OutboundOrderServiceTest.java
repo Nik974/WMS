@@ -1,7 +1,5 @@
 package com.backend.wms.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.backend.wms.dto.CreateOutboundOrderDto;
 import com.backend.wms.dto.OutboundItemDto;
 import com.backend.wms.dto.OutboundOrderDto;
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +45,9 @@ class OutboundOrderServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private StockService stockService;
 
     @Test
     void getOutboundOrderById_ShouldReturnDto_WhenOrderExists() {
@@ -307,7 +309,7 @@ class OutboundOrderServiceTest {
         when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(outboundOrderMapper.toDto(order)).thenReturn(dto);
 
-        OutboundOrderDto result = outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT);
+        OutboundOrderDto result = outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT, 7L);
 
         assertEquals(dto, result);
         assertEquals(OutboundStatus.IN_TRANSIT, order.getStatus());
@@ -321,7 +323,7 @@ class OutboundOrderServiceTest {
         when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         assertThrows(IllegalStateException.class,
-                () -> outboundOrderService.changeStatus(1L, OutboundStatus.NEW));
+                () -> outboundOrderService.changeStatus(1L, OutboundStatus.NEW, 7L));
         assertEquals(OutboundStatus.SHIPPED, order.getStatus());
         verifyNoInteractions(outboundOrderMapper);
     }
@@ -331,6 +333,33 @@ class OutboundOrderServiceTest {
         when(outboundOrderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT));
+                () -> outboundOrderService.changeStatus(1L, OutboundStatus.IN_TRANSIT, 7L));
+    }
+
+    @Test
+    void changeStatus_ShouldShipStock_WhenMovingToShipped() {
+        OutboundOrder order = new OutboundOrder();
+        order.setStatus(OutboundStatus.IN_TRANSIT);
+        OutboundOrderDto dto = new OutboundOrderDto(
+                1L, 1L, 1L, 1L, "c", OutboundStatus.SHIPPED, LocalDateTime.now(), List.of());
+
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(outboundOrderMapper.toDto(order)).thenReturn(dto);
+
+        outboundOrderService.changeStatus(1L, OutboundStatus.SHIPPED, 7L);
+
+        verify(stockService).ship(order, 7L);
+        assertEquals(OutboundStatus.SHIPPED, order.getStatus());
+    }
+
+    @Test
+    void changeStatus_ShouldNotShip_WhenCancelled() {
+        OutboundOrder order = new OutboundOrder();
+        order.setStatus(OutboundStatus.NEW);
+        when(outboundOrderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        outboundOrderService.changeStatus(1L, OutboundStatus.CANCELLED, 7L);
+
+        verifyNoInteractions(stockService);
     }
 }
