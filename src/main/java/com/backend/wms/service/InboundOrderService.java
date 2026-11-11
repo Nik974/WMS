@@ -3,18 +3,17 @@ package com.backend.wms.service;
 import com.backend.wms.dto.CreateInboundOrderDto;
 import com.backend.wms.dto.InboundItemDto;
 import com.backend.wms.dto.InboundOrderDto;
+import com.backend.wms.dto.ReceiveInboundRequest;
 import com.backend.wms.entity.*;
 import com.backend.wms.exception.ResourceNotFoundException;
 import com.backend.wms.mapper.InboundOrderMapper;
-import com.backend.wms.repository.InboundOrderRepository;
-import com.backend.wms.repository.ProductRepository;
-import com.backend.wms.repository.SupplierRepository;
-import com.backend.wms.repository.WarehouseRepository;
+import com.backend.wms.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +29,9 @@ public class InboundOrderService {
     private final WarehouseRepository warehouseRepository;
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
+    private final LocationRepository locationRepository;
+    private final BatchRepository batchRepository;
+    private final StockService stockService;
 
     private static final Map<InboundStatus, Set<InboundStatus>> ALLOWED = Map.of(
             InboundStatus.NEW, Set.of(InboundStatus.RECEIVED, InboundStatus.CANCELLED),
@@ -121,6 +123,9 @@ public class InboundOrderService {
 
     @Transactional
     public InboundOrderDto changeStatus(Long id, InboundStatus newStatus) {
+        if (newStatus == InboundStatus.RECEIVED) {
+            throw new IllegalArgumentException("Use POST /{id}/receive to receive an order");
+        }
         InboundOrder order = inboundOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inbound order not found with id: " + id));
 
@@ -128,6 +133,56 @@ public class InboundOrderService {
             throw new IllegalStateException("Cannot change status from " + order.getStatus() + " to " + newStatus);
         }
         order.setStatus(newStatus);
+        return inboundOrderMapper.toDto(order);
+    }
+
+    @Transactional
+    public InboundOrderDto receive(Long id, ReceiveInboundRequest request, Long userId) {
+        InboundOrder order = inboundOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Inbound order not found with id: " + id));
+
+        if (order.getStatus() != InboundStatus.NEW) {
+            throw new IllegalStateException("Only orders in NEW status can be received");
+        }
+
+        Map<Long, ReceiveInboundRequest.Line> lines = new HashMap<>();
+        for (ReceiveInboundRequest.Line l : request.lines()) {
+            if (lines.put(l.itemId(), l) != null) {
+                throw new IllegalArgumentException("Duplicate line for item " + l.itemId());
+            }
+        }
+        Set<Long> itemIds = order.getItems().stream().map(InboundItem::getId).collect(Collectors.toSet());
+        if (!lines.keySet().equals(itemIds)) {
+            throw new IllegalArgumentException("Every item of the order needs exactly one line");
+        }
+
+        Map<Long, Location> locations = locationRepository.findAllById(
+                        lines.values().stream().map(ReceiveInboundRequest.Line::locationId).collect(Collectors.toSet()))
+                .stream().collect(Collectors.toMap(Location::getId, l -> l));
+        Map<Long, Batch> batches = batchRepository.findAllById(
+                        lines.values().stream().map(ReceiveInboundRequest.Line::batchId).collect(Collectors.toSet()))
+                .stream().collect(Collectors.toMap(Batch::getId, b -> b));
+
+        for (InboundItem item : order.getItems()) {
+            ReceiveInboundRequest.Line line = lines.get(item.getId());
+
+            Location location = locations.get(line.locationId());
+            if (location == null)
+                throw new ResourceNotFoundException("Location not found with id: " + line.locationId());
+            Batch batch = batches.get(line.batchId());
+            if (batch == null) throw new ResourceNotFoundException("Batch not found with id: " + line.batchId());
+
+            if (!location.getWarehouse().getId().equals(order.getWarehouse().getId())) {
+                throw new IllegalArgumentException("Location " + location.getCode() + " is not in the order's warehouse");
+            }
+            if (!batch.getProduct().getId().equals(item.getProduct().getId())) {
+                throw new IllegalArgumentException("Batch " + batch.getLotNumber() + " does not belong to the product of the item");
+            }
+
+            stockService.receive(location, item.getProduct(), batch, item.getQuantity(), order.getId(), userId);
+        }
+
+        order.setStatus(InboundStatus.RECEIVED);
         return inboundOrderMapper.toDto(order);
     }
 }

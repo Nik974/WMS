@@ -3,6 +3,7 @@ package com.backend.wms.controller;
 import com.backend.wms.dto.CreateOutboundOrderDto;
 import com.backend.wms.dto.OutboundOrderDto;
 import com.backend.wms.entity.OutboundStatus;
+import com.backend.wms.entity.User;
 import com.backend.wms.service.OutboundOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -66,10 +68,12 @@ public class OutboundOrderController {
                                                    @Valid @RequestBody OutboundOrderDto dto) {
         return ResponseEntity.ok(outboundOrderService.editOutboundOrder(id, dto));
     }
+
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<OutboundOrderDto> changeStatus(@PathVariable Long id,
-                                                         @RequestParam OutboundStatus status) {
-        return ResponseEntity.ok(outboundOrderService.changeStatus(id, status));
+                                                         @RequestParam OutboundStatus status,
+                                                         @AuthenticationPrincipal User current) {
+        return ResponseEntity.ok(outboundOrderService.changeStatus(id, status, current.getId()));
     }
 }

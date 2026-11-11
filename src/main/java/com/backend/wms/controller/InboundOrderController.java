@@ -2,7 +2,9 @@ package com.backend.wms.controller;
 
 import com.backend.wms.dto.CreateInboundOrderDto;
 import com.backend.wms.dto.InboundOrderDto;
+import com.backend.wms.dto.ReceiveInboundRequest;
 import com.backend.wms.entity.InboundStatus;
+import com.backend.wms.entity.User;
 import com.backend.wms.service.InboundOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -72,5 +75,13 @@ public class InboundOrderController {
     public ResponseEntity<InboundOrderDto> changeStatus(@PathVariable Long id,
                                                         @RequestParam InboundStatus status) {
         return ResponseEntity.ok(inboundOrderService.changeStatus(id, status));
+    }
+
+    @PostMapping("/{id}/receive")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<InboundOrderDto> receive(@PathVariable Long id,
+                                                   @Valid @RequestBody ReceiveInboundRequest request,
+                                                   @AuthenticationPrincipal User current) {
+        return ResponseEntity.ok(inboundOrderService.receive(id, request, current.getId()));
     }
 }
