@@ -1,11 +1,11 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
 
 export type InboundStatus = 'NEW' | 'RECEIVED' | 'CANCELLED';
 
 export const INBOUND_TRANSITIONS: Record<InboundStatus, InboundStatus[]> = {
-  NEW: ['RECEIVED', 'CANCELLED'],
+  NEW: ['CANCELLED'],
   RECEIVED: [],
   CANCELLED: [],
 };
@@ -33,6 +33,12 @@ export interface InboundOrder {
   items: InboundItem[];
 }
 
+export interface ReceiveLine {
+  itemId: number;
+  locationId: number;
+  batchId: number;
+}
+
 export interface CreateInboundRequest {
   warehouseId: number;
   supplierId: number;
@@ -54,5 +60,9 @@ export class InboundService {
 
   changeStatus(id: number, status: InboundStatus): Observable<InboundOrder> {
     return this.http.patch<InboundOrder>(`${this.url}/${id}/status`, null, { params: { status } });
+  }
+
+  receive(id: number, lines: ReceiveLine[]): Observable<InboundOrder> {
+    return this.http.post<InboundOrder>(`${this.url}/${id}/receive`, {lines});
   }
 }

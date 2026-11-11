@@ -32,7 +32,7 @@ public class Stock {
 
     @ColumnDefault("0")
     @Column(name = "reserved_quantity", nullable = false)
-    private Integer reservedQuantity;
+    private Integer reservedQuantity = 0;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "batch_id", nullable = false)

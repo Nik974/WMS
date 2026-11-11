@@ -30,6 +30,7 @@ public class OutboundOrderService {
     private final CustomerRepository customerRepository;
     private final WarehouseRepository warehouseRepository;
     private final ProductRepository productRepository;
+    private final StockService stockService;
 
     private static final Map<OutboundStatus, Set<OutboundStatus>> ALLOWED = Map.of(
             OutboundStatus.NEW, Set.of(OutboundStatus.IN_TRANSIT, OutboundStatus.CANCELLED),
@@ -121,13 +122,16 @@ public class OutboundOrderService {
     }
 
     @Transactional
-    public OutboundOrderDto changeStatus(Long orderId, OutboundStatus newStatus) {
+    public OutboundOrderDto changeStatus(Long orderId, OutboundStatus newStatus, Long userId) {
         OutboundOrder order = outboundOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Outbound order not found with id: " + orderId));
 
         if (!ALLOWED.get(order.getStatus()).contains(newStatus)) {
-            throw new IllegalStateException(
-                    "Cannot change status from " + order.getStatus() + " to " + newStatus);
+            throw new IllegalStateException("Cannot change status from " + order.getStatus() + " to " + newStatus);
+        }
+
+        if (newStatus == OutboundStatus.SHIPPED) {
+            stockService.ship(order, userId);
         }
         order.setStatus(newStatus);
         return outboundOrderMapper.toDto(order);

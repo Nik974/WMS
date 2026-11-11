@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -44,5 +43,21 @@ public class StockMovement {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    public static final String RECEIPT = "RECEIPT";
+    public static final String SHIPMENT = "SHIPMENT";
+    public static final String ADJUSTMENT = "ADJUSTMENT";
+    public static final String TRANSFER = "TRANSFER";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "batch_id")
+    private Batch batch;
+
+    @Column(name = "reference_type", length = 20)
+    private String referenceType;
+
+    @Column(name = "reference_id")
+    private Long referenceId;
+
+    @Column(name = "comment", length = 500)
+    private String comment;
 }
