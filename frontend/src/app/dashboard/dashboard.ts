@@ -1,9 +1,9 @@
 import {Component, computed, inject} from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { Header } from '../shared/header/header';
-import { AuthService } from '../auth/auth.service';
+import {RouterLink} from '@angular/router';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {Header} from '../shared/header/header';
+import {AuthService} from '../auth/auth.service';
 
 interface Tile {
   label: string;
@@ -34,6 +34,7 @@ export class Dashboard {
     {label: 'Outbound orders', icon: 'output', link: '/outbound-orders', enabled: true},
     {label: 'Inbound orders', icon: 'system_update_alt', link: '/inbound-orders', enabled: true},
     { label: 'Users', icon: 'manage_accounts', link: '/users', enabled: true, roles: ['ADMIN'] },
+    {label: 'Audit log', icon: 'history', link: '/audit', enabled: true, roles: ['ADMIN', 'MANAGER']},
   ];
 
   tiles = computed(() => {
