@@ -1,12 +1,12 @@
-import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/login/login';
-import { RegisterComponent } from './auth/register/register';
+import {Routes} from '@angular/router';
+import {LoginComponent} from './auth/login/login';
+import {RegisterComponent} from './auth/register/register';
 import {roleGuard} from './auth/auth.guard';
 import {Dashboard} from './dashboard/dashboard';
 import {Products} from './products/products';
 import {Categories} from './categories/categories';
 import {Warehouses} from './warehouses/warehouses';
-import { Customers } from './customers/customers';
+import {Customers} from './customers/customers';
 import {Orders} from './orders/orders';
 import {Suppliers} from './suppliers/suppliers';
 import {InboundOrders} from './inbound-orders/inbound-orders';
@@ -14,6 +14,7 @@ import {Locations} from './locations/locations';
 import {Batches} from './batches/batches';
 import {Home} from './home/home';
 import {Users} from './admin/users';
+import {AuditLog} from './audit/audit-log';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,5 +32,6 @@ export const routes: Routes = [
   { path: 'locations', component: Locations, canActivate: [roleGuard] },
   { path: 'batches', component: Batches, canActivate: [roleGuard] },
   { path: 'users', component: Users, canActivate: [roleGuard, roleGuard('ADMIN')] },
+  {path: 'audit', component: AuditLog, canActivate: [roleGuard, roleGuard('ADMIN', 'MANAGER')]},
   { path: '**', redirectTo: '' }
 ];
