@@ -33,6 +33,7 @@ export class Dashboard {
     {label: 'Suppliers', icon: 'store', link: '/suppliers', enabled: true},
     {label: 'Outbound orders', icon: 'output', link: '/outbound-orders', enabled: true},
     {label: 'Inbound orders', icon: 'system_update_alt', link: '/inbound-orders', enabled: true},
+    {label: 'Stock movements', icon: 'swap_vert', link: '/movements', enabled: true},
     { label: 'Users', icon: 'manage_accounts', link: '/users', enabled: true, roles: ['ADMIN'] },
     {label: 'Audit log', icon: 'history', link: '/audit', enabled: true, roles: ['ADMIN', 'MANAGER']},
   ];
