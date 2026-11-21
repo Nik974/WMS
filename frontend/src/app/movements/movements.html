@@ -1,0 +1,91 @@
+<app-header/>
+
+<main class="page">
+  <div class="page-header">
+    <h1>Stock movements</h1>
+    <button mat-button (click)="load()">Refresh</button>
+  </div>
+
+  <mat-expansion-panel class="filters">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Search</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="filterForm" class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Product or lot</mat-label>
+        <input matInput formControlName="product"/>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>User</mat-label>
+        <input matInput formControlName="user"/>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="">All</mat-option>
+          @for (t of types; track t) {
+            <mat-option [value]="t">{{ label(t) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-button type="button" (click)="clearFilters()">Clear</button>
+    </form>
+  </mat-expansion-panel>
+
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource">
+      <ng-container matColumnDef="time">
+        <th mat-header-cell *matHeaderCellDef>Time</th>
+        <td mat-cell *matCellDef="let m" class="nowrap">{{ m.createdAt | date: 'dd.MM.yyyy HH:mm:ss' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let m"><span [class]="'chip ' + m.movementType">{{ label(m.movementType) }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="product">
+        <th mat-header-cell *matHeaderCellDef>Product</th>
+        <td mat-cell *matCellDef="let m">
+          <div>{{ m.productName ?? ('#' + m.productId) }}</div>
+          @if (m.lotNumber) {
+            <div class="sub">Lot {{ m.lotNumber }}</div>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="route">
+        <th mat-header-cell *matHeaderCellDef>Location</th>
+        <td mat-cell *matCellDef="let m" class="nowrap">{{ route(m) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef>Qty</th>
+        <td mat-cell *matCellDef="let m" [class]="'qty ' + direction(m)">{{ sign(m) }}{{ m.quantity }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="reference">
+        <th mat-header-cell *matHeaderCellDef>Reference</th>
+        <td mat-cell *matCellDef="let m">{{ reference(m) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef>User</th>
+        <td mat-cell *matCellDef="let m">{{ m.username }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="empty" [attr.colspan]="columns.length">
+          {{ loading() ? 'Loading...' : 'No movements found' }}
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Select page"/>
+  </div>
+</main>
