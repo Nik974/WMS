@@ -16,6 +16,7 @@ import {Home} from './home/home';
 import {Users} from './admin/users';
 import {AuditLog} from './audit/audit-log';
 import {Movements} from "./movements/movements";
+import {Stocks} from './stocks/stocks';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'locations', component: Locations, canActivate: [roleGuard] },
   { path: 'batches', component: Batches, canActivate: [roleGuard] },
   {path: 'movements', component: Movements, canActivate: [roleGuard]},
+  {path: 'stock', component: Stocks, canActivate: [roleGuard]},
   { path: 'users', component: Users, canActivate: [roleGuard, roleGuard('ADMIN')] },
   {path: 'audit', component: AuditLog, canActivate: [roleGuard, roleGuard('ADMIN', 'MANAGER')]},
   { path: '**', redirectTo: '' }
