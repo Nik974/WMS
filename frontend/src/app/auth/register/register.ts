@@ -1,16 +1,15 @@
-import { Component, signal} from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import {Component, signal} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
 import {AuthService} from '../auth.service';
 import {HttpErrorResponse} from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbar } from '@angular/material/toolbar';
-import { MatOption, MatSelect } from '@angular/material/select';
+import {CommonModule} from '@angular/common';
+import {MatCardModule} from '@angular/material/card';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatToolbar} from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-register',
@@ -25,8 +24,6 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatButtonModule,
     MatIconModule,
     MatToolbar,
-    MatSelect,
-    MatOption,
   ],
   templateUrl: './register.html',
   styleUrls: ['./register.scss'],
